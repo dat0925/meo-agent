@@ -61,6 +61,9 @@ body {
 .modal-btn:hover { opacity: .88; }
 .modal-note { font-size: 11px; color: var(--text-mid); margin-top: 10px; text-align: center; }
 .modal-note a { color: var(--green); text-decoration: none; }
+.modal-service-link { margin-top: 10px; text-align: center; }
+.modal-service-link a { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-mid); text-decoration: none; transition: color .15s; }
+.modal-service-link a:hover { color: var(--green); }
 
 /* ---- チャットコンテナ ---- */
 .container {
@@ -233,6 +236,12 @@ body {
     <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
     <button class="modal-btn" onclick="saveApiKey()">デモを開始する</button>
     <p class="modal-note"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> でAPIキーを取得できます</p>
+    <div class="modal-service-link">
+      <a href="https://agt-lp.taskra.jp/" target="_blank" title="サービスサイトを見る">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        サービスサイト
+      </a>
+    </div>
   </div>
 </div>
 
