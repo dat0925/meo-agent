@@ -109,9 +109,17 @@ body {
   font-size: 10px; color: #aaa; margin-top: 3px; padding: 0 2px;
 }
 
+.quick-btns-wrap {
+  position: relative; background: white; border-top: 1px solid #eee;
+}
+.quick-btns-wrap::after {
+  content: ''; position: absolute; top: 0; right: 0;
+  width: 40px; height: 100%;
+  background: linear-gradient(to right, transparent, white);
+  pointer-events: none;
+}
 .quick-btns {
-  padding: 8px 12px 6px; background: white;
-  border-top: 1px solid #eee;
+  padding: 8px 12px 6px;
   display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
 }
 .quick-btns::-webkit-scrollbar { display: none; }
@@ -183,13 +191,15 @@ body {
     <div class="date-divider">今日</div>
   </div>
 
-  <div class="quick-btns">
-    <button class="quick-btn" onclick="sendQuick('未返信の口コミを見せて')">📬 未返信口コミ</button>
-    <button class="quick-btn" onclick="sendQuick('最近の投稿状況は？')">📝 投稿状況</button>
-    <button class="quick-btn" onclick="sendQuick('先月のアクセスデータを教えて')">📊 データ確認</button>
-    <button class="quick-btn" onclick="sendQuick('投稿案を3つ作って')">✍️ 投稿案</button>
-    <button class="quick-btn" onclick="sendQuick('写真の状況は？')">📸 写真確認</button>
-    <button class="quick-btn" onclick="sendQuick('苦情口コミへの返信文を作って')">⚠️ 苦情対応</button>
+  <div class="quick-btns-wrap">
+    <div class="quick-btns">
+      <button class="quick-btn" onclick="sendQuick('未返信の口コミを見せて')">📬 未返信口コミ</button>
+      <button class="quick-btn" onclick="sendQuick('最近の投稿状況は？')">📝 投稿状況</button>
+      <button class="quick-btn" onclick="sendQuick('先月のアクセスデータを教えて')">📊 データ確認</button>
+      <button class="quick-btn" onclick="sendQuick('投稿案を3つ作って')">✍️ 投稿案</button>
+      <button class="quick-btn" onclick="sendQuick('写真の状況は？')">📸 写真確認</button>
+      <button class="quick-btn" onclick="sendQuick('苦情口コミへの返信文を作って')">⚠️ 苦情対応</button>
+    </div>
   </div>
 
   <div class="input-area">
