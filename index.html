@@ -4,818 +4,609 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MEOコンシェルジュ — デモ</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --green: #06C755;
-  --green-dark: #04a344;
-  --green-light: #e8faf0;
-  --bg: #f0f2f5;
+  --green: #1a7a4a;
+  --green-dark: #145f3a;
+  --green-light: #f0f7f3;
+  --green-mid: rgba(26,122,74,.15);
+  --bg-chat: #f2f4f6;
   --white: #ffffff;
-  --gray-1: #f7f8fa;
-  --gray-2: #e9eaec;
-  --gray-3: #b0b7c0;
-  --gray-4: #6b7585;
-  --gray-5: #2d3748;
-  --black: #1a202c;
-  --red: #e53e3e;
-  --yellow: #f6ad55;
-  --blue: #3182ce;
+  --text: #1c1c1e;
+  --text-mid: #6e6e73;
+  --border: #e4e4e8;
   --radius: 18px;
-  --radius-sm: 10px;
-  --shadow: 0 2px 16px rgba(0,0,0,0.10);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,0.13);
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
+html, body { height: 100%; }
 body {
-  font-family: 'Noto Sans JP', sans-serif;
-  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  background: #d8dde3;
+  display: flex; justify-content: center; align-items: center;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: var(--black);
-  padding-bottom: 40px;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ========== API KEY MODAL ========== */
-#apiModal {
+/* ---- モーダル ---- */
+.modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center;
-  z-index: 1000;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(8px);
+  display: flex; justify-content: center; align-items: center; z-index: 200;
 }
-.modal-box {
-  background: var(--white);
-  border-radius: 24px;
-  padding: 36px 32px;
-  width: 90%; max-width: 420px;
-  box-shadow: var(--shadow-lg);
-  text-align: center;
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: white; border-radius: 20px; padding: 36px 32px;
+  width: 90%; max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.25);
 }
-.modal-box h2 {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.3rem;
-  margin-bottom: 8px;
-  color: var(--black);
+.modal-icon {
+  width: 52px; height: 52px; background: var(--green-light);
+  border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
 }
-.modal-box p { font-size: 0.85rem; color: var(--gray-4); margin-bottom: 20px; line-height: 1.6; }
-.modal-box input {
-  width: 100%;
-  padding: 13px 16px;
-  border: 1.5px solid var(--gray-2);
-  border-radius: 12px;
-  font-size: 0.95rem;
-  outline: none;
-  margin-bottom: 14px;
-  transition: border 0.2s;
-  font-family: monospace;
+.modal-icon svg { width: 26px; height: 26px; }
+.modal h2 { font-size: 17px; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.modal p { font-size: 13px; color: var(--text-mid); margin-bottom: 20px; line-height: 1.65; }
+.modal input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 14px; margin-bottom: 12px; outline: none;
+  transition: border-color .15s; font-family: inherit; color: var(--text);
 }
-.modal-box input:focus { border-color: var(--green); }
-.modal-box button {
-  width: 100%;
-  padding: 14px;
-  background: var(--green);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  font-family: 'Noto Sans JP', sans-serif;
-  transition: background 0.2s;
+.modal input:focus { border-color: var(--green); }
+.modal-btn {
+  width: 100%; padding: 13px; background: var(--green); color: white;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: opacity .15s; font-family: inherit;
 }
-.modal-box button:hover { background: var(--green-dark); }
-.modal-sub { font-size: 0.78rem; color: var(--gray-3); margin-top: 14px; }
-.modal-sub a { color: var(--green); text-decoration: none; }
+.modal-btn:hover { opacity: .88; }
+.modal-note { font-size: 11px; color: var(--text-mid); margin-top: 10px; text-align: center; }
+.modal-note a { color: var(--green); text-decoration: none; }
+.modal-service-link { margin-top: 10px; text-align: center; }
+.modal-service-link a { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-mid); text-decoration: none; transition: color .15s; }
+.modal-service-link a:hover { color: var(--green); }
 
-/* ========== HEADER ========== */
-#appHeader {
-  width: 100%;
-  max-width: 480px;
-  background: var(--white);
-  border-bottom: 1.5px solid var(--gray-2);
-  padding: 13px 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: sticky; top: 0;
-  z-index: 100;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+/* ---- チャットコンテナ ---- */
+.container {
+  width: 100%; max-width: 460px; height: 100svh;
+  display: flex; flex-direction: column; background: var(--bg-chat);
+  box-shadow: 0 0 60px rgba(0,0,0,.2);
+  overflow: hidden;
 }
-.header-icon {
-  width: 36px; height: 36px;
-  background: var(--green);
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
+
+/* ---- ヘッダー ---- */
+.header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
 }
-.header-title { flex: 1; }
-.header-title .name {
-  font-family: 'Syne', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--black);
+.header-left { display: flex; align-items: center; gap: 10px; }
+.bot-avatar {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: linear-gradient(135deg, #1a7a4a, #2eb872);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.header-title .sub {
-  font-size: 0.72rem;
-  color: var(--gray-3);
+.bot-avatar svg { width: 22px; height: 22px; }
+.header-name {
+  font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.2;
+  display: flex; align-items: center; gap: 6px;
 }
-.demo-badge {
-  background: #fffbe6;
-  border: 1px solid var(--yellow);
-  color: #b7791f;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 20px;
+.online-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #34c759;
+  display: inline-block; flex-shrink: 0;
 }
-.lp-link {
-  font-size: 0.72rem;
-  color: var(--green);
+.header-sub { font-size: 11px; color: var(--text-mid); margin-top: 1px; }
+.header-demo-badge {
+  background: var(--green-light); color: var(--green);
+  border: 1px solid rgba(26,122,74,.2);
+  border-radius: 6px; padding: 2px 8px; font-size: 10px; font-weight: 700;
+  letter-spacing: .04em;
+}
+.header-actions { display: flex; align-items: center; gap: 4px; }
+.header-icon-btn {
+  width: 34px; height: 34px; border-radius: 8px; border: none;
+  background: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: var(--text-mid); transition: background .15s;
   text-decoration: none;
 }
+.header-icon-btn:hover { background: var(--green-light); color: var(--green); }
+.header-icon-btn svg { width: 18px; height: 18px; }
 
-/* ========== QUICK ACTIONS ========== */
-#quickActions {
-  width: 100%;
-  max-width: 480px;
-  padding: 10px 12px 6px;
-  background: var(--white);
-  border-bottom: 1.5px solid var(--gray-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-  white-space: nowrap;
+/* ---- メッセージエリア ---- */
+.messages {
+  flex: 1; overflow-y: auto; padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 12px;
+  scroll-behavior: smooth;
 }
-#quickActions::-webkit-scrollbar { display: none; }
-.qa-btn {
-  display: inline-block;
-  background: var(--gray-1);
-  border: 1.5px solid var(--gray-2);
-  border-radius: 20px;
-  padding: 6px 13px;
-  font-size: 0.78rem;
-  color: var(--gray-5);
-  margin-right: 7px;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-  font-family: 'Noto Sans JP', sans-serif;
-}
-.qa-btn:hover { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 2px; }
 
-/* ========== CHAT ========== */
-#chatWrap {
-  width: 100%;
-  max-width: 480px;
-  flex: 1;
-  padding: 14px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-}
-
-.msg { display: flex; gap: 8px; align-items: flex-end; animation: fadeUp 0.25s ease; }
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+.msg { display: flex; gap: 8px; align-items: flex-end; }
 .msg.user { flex-direction: row-reverse; }
 
-.avatar {
-  width: 32px; height: 32px;
-  background: var(--green);
-  border-radius: 50%;
+.msg-avatar {
+  width: 30px; height: 30px; border-radius: 10px;
+  background: linear-gradient(135deg, #1a7a4a, #2eb872);
   display: flex; align-items: center; justify-content: center;
-  font-size: 16px;
   flex-shrink: 0;
 }
-.msg.user .avatar { background: var(--gray-2); font-size: 15px; }
+.msg-avatar svg { width: 17px; height: 17px; }
+
+.bubble-wrap { display: flex; flex-direction: column; max-width: 80%; }
+.msg.user .bubble-wrap { align-items: flex-end; }
 
 .bubble {
-  max-width: 78%;
-  background: var(--white);
-  border-radius: 18px 18px 18px 4px;
-  padding: 11px 14px;
-  font-size: 0.875rem;
-  line-height: 1.65;
-  box-shadow: var(--shadow);
-  color: var(--black);
-  white-space: pre-wrap;
+  padding: 10px 14px; line-height: 1.65; font-size: 13.5px;
+  white-space: pre-wrap; word-break: break-word;
+}
+.msg.bot .bubble {
+  background: var(--white); color: var(--text);
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
 }
 .msg.user .bubble {
-  background: var(--green);
-  color: white;
-  border-radius: 18px 18px 4px 18px;
-  box-shadow: 0 2px 12px rgba(6,199,85,0.25);
+  background: var(--green); color: white;
+  border-radius: 16px 16px 4px 16px;
 }
-.bubble a { color: var(--green); }
-.msg.user .bubble a { color: rgba(255,255,255,0.85); }
+.msg.loading .bubble { color: var(--text-mid); font-style: italic; }
 
-/* 画像プレビュー bubble */
-.bubble .img-preview {
-  width: 100%;
-  max-width: 220px;
-  border-radius: 12px;
-  margin-top: 8px;
-  display: block;
-}
-.bubble .gbp-photo-frame {
-  background: #f5f5f5;
-  border: 2px dashed var(--green);
-  border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-  margin-top: 10px;
-  font-size: 0.82rem;
-  color: var(--gray-4);
-}
-.gbp-photo-frame .check { font-size: 2rem; display: block; margin-bottom: 6px; }
-.gbp-photo-frame strong { color: var(--green-dark); font-size: 0.95rem; display: block; margin-bottom: 3px; }
-
-/* store info card */
-.info-card {
-  background: var(--gray-1);
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-top: 8px;
-  font-size: 0.82rem;
-  line-height: 1.7;
-}
-.info-card .row { display: flex; gap: 8px; align-items: flex-start; }
-.info-card .label { color: var(--gray-4); min-width: 60px; font-size: 0.78rem; }
-.info-card .val { color: var(--black); font-weight: 500; }
-.info-card .changed { color: var(--green-dark); font-weight: 700; }
-
-/* action buttons inside bubble */
-.bubble-actions { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
-.bub-btn {
-  background: white;
-  border: 1.5px solid var(--green);
-  color: var(--green-dark);
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 0.80rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: 'Noto Sans JP', sans-serif;
-}
-.bub-btn:hover { background: var(--green); color: white; }
-.bub-btn.red { border-color: var(--red); color: var(--red); }
-.bub-btn.red:hover { background: var(--red); color: white; }
-
-/* typing */
-.typing-bubble {
-  background: var(--white);
-  border-radius: 18px 18px 18px 4px;
-  padding: 12px 16px;
-  display: flex; align-items: center; gap: 5px;
-  box-shadow: var(--shadow);
-  width: 58px;
-}
-.typing-bubble span {
-  width: 7px; height: 7px;
-  background: var(--gray-3);
-  border-radius: 50%;
-  animation: bounce 1.2s infinite;
-}
-.typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
-.typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
-@keyframes bounce {
-  0%,80%,100% { transform: translateY(0); }
-  40% { transform: translateY(-7px); }
+.bubble img.photo-preview {
+  max-width: 200px; max-height: 160px;
+  border-radius: 10px; display: block; margin-bottom: 4px;
+  object-fit: cover;
 }
 
-/* date divider */
+.tool-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.tool-chip {
+  font-size: 10px; background: var(--green-light); color: var(--green);
+  border: 1px solid rgba(26,122,74,.2); border-radius: 100px; padding: 2px 8px;
+  font-weight: 600;
+}
+.timestamp { font-size: 10px; color: var(--text-mid); margin-top: 4px; }
+
 .date-divider {
-  text-align: center;
-  font-size: 0.72rem;
-  color: var(--gray-3);
-  padding: 4px 0;
+  align-self: center; font-size: 11px; color: var(--text-mid);
+  background: rgba(0,0,0,.07); border-radius: 100px;
+  padding: 3px 12px;
 }
 
-/* ========== INPUT AREA ========== */
-#inputArea {
-  width: 100%;
-  max-width: 480px;
-  background: var(--white);
-  border-top: 1.5px solid var(--gray-2);
-  padding: 10px 12px;
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  position: sticky; bottom: 0;
+/* ---- クイックボタン ---- */
+.quick-btns-wrap {
+  background: var(--white); border-top: 1px solid var(--border);
+  display: flex; align-items: center; flex-shrink: 0;
 }
+.quick-btns {
+  flex: 1; padding: 8px 10px 8px 14px;
+  display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none;
+}
+.quick-btns::-webkit-scrollbar { display: none; }
+.quick-btn {
+  white-space: nowrap; padding: 6px 14px;
+  border: 1.5px solid var(--border); color: var(--text-mid);
+  border-radius: 100px; font-size: 12px; cursor: pointer;
+  background: var(--white); flex-shrink: 0;
+  transition: border-color .15s, color .15s, background .15s;
+  font-family: inherit;
+}
+.quick-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+.scroll-arrow {
+  flex-shrink: 0; width: 26px; height: 26px; margin-right: 8px;
+  background: none; border: 1px solid var(--border); border-radius: 50%;
+  font-size: 13px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; color: var(--text-mid);
+  transition: all .15s;
+}
+.scroll-arrow:hover { border-color: var(--green); color: var(--green); }
 
-/* 写真アップロードボタン */
-#photoBtn {
-  width: 40px; height: 40px;
-  background: var(--gray-1);
-  border: 1.5px solid var(--gray-2);
-  border-radius: 50%;
+/* ---- 入力エリア ---- */
+.input-area {
+  padding: 10px 14px 14px; background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: flex-end; gap: 8px; flex-shrink: 0;
+}
+.photo-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--white);
+  cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  font-size: 18px;
-  flex-shrink: 0;
-  transition: all 0.15s;
+  color: var(--text-mid); transition: all .15s;
 }
-#photoBtn:hover { background: var(--green-light); border-color: var(--green); }
-#photoInput { display: none; }
-
-#chatInput {
-  flex: 1;
-  min-height: 40px;
-  max-height: 120px;
-  padding: 10px 14px;
-  border: 1.5px solid var(--gray-2);
-  border-radius: 22px;
-  resize: none;
-  font-size: 0.90rem;
-  font-family: 'Noto Sans JP', sans-serif;
-  outline: none;
-  transition: border 0.2s;
-  line-height: 1.5;
+.photo-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+.photo-btn svg { width: 17px; height: 17px; }
+#photoFileInput { display: none; }
+.input-area textarea {
+  flex: 1; padding: 9px 14px;
+  border: 1.5px solid var(--border); border-radius: 20px;
+  font-size: 14px; outline: none; resize: none;
+  max-height: 96px; line-height: 1.5; font-family: inherit;
+  color: var(--text); background: var(--bg-chat);
+  transition: border-color .15s;
 }
-#chatInput:focus { border-color: var(--green); }
-#chatInput::placeholder { color: var(--gray-3); }
-
-#sendBtn {
-  width: 40px; height: 40px;
-  background: var(--green);
-  border: none;
-  border-radius: 50%;
+.input-area textarea:focus { border-color: var(--green); background: white; }
+.send-btn {
+  width: 38px; height: 38px; background: var(--green); color: white;
+  border: none; border-radius: 50%; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.2s, transform 0.1s;
-  font-size: 18px;
+  transition: opacity .15s;
 }
-#sendBtn:hover { background: var(--green-dark); }
-#sendBtn:active { transform: scale(0.93); }
-#sendBtn:disabled { background: var(--gray-2); cursor: not-allowed; }
+.send-btn svg { width: 16px; height: 16px; }
+.send-btn:disabled { background: var(--border); cursor: default; }
+.send-btn:not(:disabled):hover { opacity: .85; }
 </style>
 </head>
 <body>
 
-<!-- API KEY MODAL -->
-<div id="apiModal">
-  <div class="modal-box">
-    <h2>🔑 APIキーを入力</h2>
-    <p>このデモはブラウザから直接 Claude API を呼び出します。<br>入力したキーはブラウザにのみ保存され、外部には送信されません。</p>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." autocomplete="off">
-    <button onclick="startDemo()">デモを開始する</button>
-    <p class="modal-sub"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> でAPIキーを取得できます</p>
+<!-- APIキー入力モーダル -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1a7a4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h2>APIキーを入力してください</h2>
+    <p>このデモはブラウザから直接 Claude API を呼び出します。入力したキーはブラウザにのみ保存され、外部には送信されません。</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+    <button class="modal-btn" onclick="saveApiKey()">デモを開始する</button>
+    <p class="modal-note"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> でAPIキーを取得できます</p>
+    <div class="modal-service-link">
+      <a href="https://agt-lp.taskra.jp/" target="_blank" title="サービスサイトを見る">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        サービスサイト
+      </a>
+    </div>
   </div>
 </div>
 
-<!-- HEADER -->
-<div id="appHeader" style="display:none">
-  <div class="header-icon">🤖</div>
-  <div class="header-title">
-    <div class="name">MEOコンシェルジュ</div>
-    <div class="sub">焼肉 大将 ・ <span style="color:var(--green)">●</span> オンライン</div>
+<!-- チャット画面 -->
+<div class="container">
+
+  <!-- ヘッダー -->
+  <div class="header">
+    <div class="header-left">
+      <div class="bot-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="8" width="18" height="12" rx="3"/>
+          <circle cx="9" cy="14" r="1.5" fill="white" stroke="none"/>
+          <circle cx="15" cy="14" r="1.5" fill="white" stroke="none"/>
+          <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+          <line x1="12" y1="3" x2="12" y2="4"/>
+        </svg>
+      </div>
+      <div class="header-info">
+        <div class="header-name">
+          MEOコンシェルジュ
+          <span class="online-dot"></span>
+        </div>
+        <div class="header-sub">焼肉 大将 ・ デモモード</div>
+      </div>
+      <span class="header-demo-badge">DEMO</span>
+    </div>
+    <div class="header-actions">
+      <a href="https://agt-lp.taskra.jp/" target="_blank"
+         class="header-icon-btn" title="サービスサイトを見る">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4M8 12h8"/>
+        </svg>
+      </a>
+      <button class="header-icon-btn" onclick="clearApiKey()" title="APIキーを変更">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+        </svg>
+      </button>
+    </div>
   </div>
-  <span class="demo-badge">DEMO</span>
-  <a href="https://agt-lp.taskra.jp/" target="_blank" class="lp-link">▶ LP</a>
-</div>
 
-<!-- QUICK ACTIONS -->
-<div id="quickActions" style="display:none">
-  <span class="qa-btn" onclick="quickSend('未返信の口コミを見せて')">💬 口コミ確認</span>
-  <span class="qa-btn" onclick="quickSend('GBP投稿案を作って')">📝 投稿を作る</span>
-  <span class="qa-btn" onclick="quickSend('先月のデータ教えて')">📊 データ分析</span>
-  <span class="qa-btn" onclick="quickSend('店舗情報を変更したい')">✏️ 店舗情報変更</span>
-  <span class="qa-btn" onclick="uploadPhoto()">📸 写真を送る</span>
-  <span class="qa-btn" onclick="quickSend('キーワード順位を教えて')">📍 順位確認</span>
-  <span class="qa-btn" onclick="quickSend('今月の月次レポートをまとめて')">📋 月次レポート</span>
-  <span class="qa-btn" onclick="quickSend('AI画像を生成して投稿したい')">🎨 AI画像生成</span>
-</div>
+  <!-- メッセージ -->
+  <div class="messages" id="messages">
+    <div class="date-divider">今日</div>
+  </div>
 
-<!-- CHAT -->
-<div id="chatWrap" style="display:none"></div>
+  <!-- クイックボタン -->
+  <div class="quick-btns-wrap">
+    <button class="scroll-arrow" onclick="scrollQuickBtns(-1)" style="margin-left:8px;margin-right:0;">&#8249;</button>
+    <div class="quick-btns" id="quickBtns">
+      <button class="quick-btn" onclick="sendQuick('未返信の口コミを見せて')">📬 未返信口コミ</button>
+      <button class="quick-btn" onclick="sendQuick('最近の投稿状況は？')">📝 投稿状況</button>
+      <button class="quick-btn" onclick="sendQuick('先月のアクセスデータを教えて')">📊 データ確認</button>
+      <button class="quick-btn" onclick="sendQuick('投稿案を3つ作って')">✍️ 投稿案</button>
+      <button class="quick-btn" onclick="triggerPhotoUpload()">📸 写真を送る</button>
+      <button class="quick-btn" onclick="sendQuick('苦情口コミへの返信文を作って')">⚠️ 苦情対応</button>
+      <button class="quick-btn" onclick="sendQuick('店舗情報を変更したい')">✏️ 店舗情報変更</button>
+      <button class="quick-btn" onclick="sendQuick('キーワード順位を教えて')">📍 キーワード順位</button>
+      <button class="quick-btn" onclick="sendQuick('今月の月次レポートをまとめて')">📋 月次レポート</button>
+      <button class="quick-btn" onclick="sendQuick('AI画像を生成して投稿したい')">🎨 AI画像生成</button>
+    </div>
+    <button class="scroll-arrow" onclick="scrollQuickBtns(1)" style="margin-right:8px;">&#8250;</button>
+  </div>
 
-<!-- INPUT -->
-<div id="inputArea" style="display:none">
-  <div id="photoBtn" onclick="uploadPhoto()" title="写真を送る">📷</div>
-  <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoUpload(event)">
-  <textarea id="chatInput" placeholder="メッセージを入力…" rows="1"
-    onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"
-    oninput="autoResize(this)"></textarea>
-  <button id="sendBtn" onclick="sendMsg()">➤</button>
+  <!-- 入力 -->
+  <div class="input-area">
+    <button class="photo-btn" onclick="triggerPhotoUpload()" title="写真を送る">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <circle cx="8.5" cy="8.5" r="1.5"/>
+        <polyline points="21 15 16 10 5 21"/>
+      </svg>
+    </button>
+    <input type="file" id="photoFileInput" accept="image/*" onchange="handlePhotoSelected(event)">
+    <textarea id="msgInput" placeholder="メッセージを入力..." rows="1"
+      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
 </div>
 
 <script>
-// ===================== STATE =====================
-let ANTHROPIC_KEY = '';
-let messages = [];
-let isLoading = false;
-
-// Store state (デモ用の店舗情報)
-let storeInfo = {
+// ============================================================
+// モックデータ
+// ============================================================
+const STORE = {
   name: '焼肉 大将',
   address: '東京都渋谷区渋谷2-10-3 渋谷グランベルビル2F',
   category: '焼肉店',
   phone: '03-1234-5678',
-  hours: {
-    mon: '11:00〜23:00',
-    tue: '11:00〜23:00',
-    wed: '11:00〜23:00',
-    thu: '11:00〜23:00',
-    fri: '11:00〜24:00',
-    sat: '10:00〜24:00',
-    sun: '10:00〜22:00',
-  },
+  hours: '月〜木 11:00〜23:00 / 金土 11:00〜24:00 / 日 10:00〜22:00',
   holiday: 'なし（年中無休）',
   url: 'https://yakiniku-taisho.example.com',
   description: '厳選和牛を使用した本格焼肉店。個室完備で接待・記念日にも最適。',
-  photos: 12,
+  photo_count: 12,
 };
 
-// 変更待ち状態管理
-let pendingChange = null; // { field, value, displayLabel }
+const MOCK_REVIEWS = [
+  { id: 'review-001', reviewer: '田中 太郎', stars: 5, comment: 'お肉が柔らかくてとても美味しかったです！スタッフの方も親切で、また来ます。', replied: false },
+  { id: 'review-002', reviewer: '佐藤 花子', stars: 4, comment: 'コスパが良く満足しています。少し煙が気になりました。', replied: false },
+  { id: 'review-003', reviewer: '山田 次郎', stars: 2, comment: '注文してから30分以上待たされました。改善をお願いします。', replied: false },
+];
+let reviews = MOCK_REVIEWS.map(r => ({...r}));
 
-// ===================== INIT =====================
-function startDemo() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key.startsWith('sk-')) {
-    alert('有効なAPIキーを入力してください（sk-ant-...）');
-    return;
+function daysAgo(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
+let posts = [{ id: 'post-001', text: '【週末限定】黒毛和牛カルビが10%オフ！この機会をお見逃しなく🔥', date: daysAgo(35), status: 'published' }];
+
+// ============================================================
+// Tools
+// ============================================================
+const TOOLS = [
+  { name: 'get_gbp_stats', description: 'GBPの集客データを取得します。', input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'get_unanswered_reviews', description: '未返信の口コミ一覧を取得します。', input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'reply_to_review', description: '口コミに返信を投稿します。', input_schema: { type: 'object', properties: { review_id: { type: 'string' }, reply_text: { type: 'string' } }, required: ['review_id', 'reply_text'] } },
+  { name: 'create_gbp_post', description: 'GBPに投稿を公開します。', input_schema: { type: 'object', properties: { text: { type: 'string' } }, required: ['text'] } },
+  { name: 'get_posts_history', description: '過去のGBP投稿一覧を取得します。', input_schema: { type: 'object', properties: { limit: { type: 'integer' } }, required: [] } },
+  { name: 'generate_post_draft', description: '投稿案を複数生成します。', input_schema: { type: 'object', properties: { theme: { type: 'string' }, count: { type: 'integer' } }, required: [] } },
+  { name: 'generate_review_reply', description: '口コミへの返信文を生成します。', input_schema: { type: 'object', properties: { review_id: { type: 'string' } }, required: ['review_id'] } },
+  { name: 'upload_photo_to_gbp', description: '写真をGBPにアップロードします。カテゴリ: FOOD/INTERIOR/EXTERIOR/TEAM', input_schema: { type: 'object', properties: { category: { type: 'string' }, caption: { type: 'string' } }, required: ['category'] } },
+  { name: 'get_store_info', description: '現在のGBP店舗情報を取得します。', input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'update_store_info', description: 'GBPの店舗情報を更新します。フィールド: address/category/phone/hours/holiday/url/description', input_schema: { type: 'object', properties: { field: { type: 'string' }, value: { type: 'string' } }, required: ['field','value'] } },
+  { name: 'get_keyword_rankings', description: '登録キーワードのGoogleマップ順位を取得します。', input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'get_monthly_report', description: '月次レポートを生成します。', input_schema: { type: 'object', properties: { month: { type: 'string' } }, required: [] } },
+];
+
+function executeTool(name, input) {
+  if (name === 'get_gbp_stats') return { period: '直近30日', search_impressions: 1240, map_impressions: 830, website_clicks: 95, direction_requests: 42, phone_calls: 18, photo_views: 3200 };
+  if (name === 'get_unanswered_reviews') return reviews.filter(r => !r.replied).map(r => ({ review_id: r.id, reviewer: r.reviewer, stars: r.stars, comment: r.comment }));
+  if (name === 'reply_to_review') { const r = reviews.find(r => r.id === input.review_id); if (r) { r.replied = true; r.reply_text = input.reply_text; } return { success: true, message: '返信を投稿しました（モック）' }; }
+  if (name === 'create_gbp_post') { const p = { id: 'post-' + String(posts.length+1).padStart(3,'0'), text: input.text, date: new Date().toISOString().slice(0,10), status: 'published' }; posts.push(p); return { success: true, post_id: p.id, message: '投稿を公開しました（モック）' }; }
+  if (name === 'get_posts_history') { const sorted = [...posts].sort((a,b) => b.date.localeCompare(a.date)); const last = sorted[0]?.date; const days = last ? Math.floor((Date.now()-new Date(last))/86400000) : null; return { posts: sorted.slice(0, input.limit||10), last_post_at: last, days_since_last_post: days }; }
+  if (name === 'generate_post_draft') { const theme = input.theme||'お店の魅力'; const count = input.count||3; return { drafts: ['【'+theme+'】焼肉 大将では、黒毛和牛をリーズナブルにご提供しています🐄 ご家族・ご友人との特別なひとときに、ぜひお越しください！', '🔥 '+theme+'キャンペーン開催中！期間限定でドリンク1杯無料サービス中。詳しくはお店にお問い合わせください。', '✨ '+theme+'にぴったりのコースをご用意しました。ご予約はお電話またはWeb予約で承ります。', '🌟 当店自慢の熟成肉とともに、素敵なひとときをお過ごしください！'].slice(0, count) }; }
+  if (name === 'generate_review_reply') { const r = reviews.find(r => r.id === input.review_id); if (!r) return { error: '見つかりません' }; let reply; if (r.stars >= 4) reply = 'この度は温かいご口コミをいただき、誠にありがとうございます！'+r.reviewer+'様にまたお越しいただけることを、スタッフ一同心よりお待ちしております🙏'; else if (r.stars <= 2) reply = 'この度はご不満をおかけし、大変申し訳ございませんでした。'+r.reviewer+'様のご意見を真摯に受け止め、改善に努めてまいります。またの機会にぜひお試しいただけますと幸いです。'; else reply = 'ご来店いただき、誠にありがとうございます。'+r.reviewer+'様のご意見はスタッフ一同の励みとなっております。またのお越しを心よりお待ちしております。'; return { review_id: input.review_id, suggested_reply: reply }; }
+  if (name === 'upload_photo_to_gbp') { STORE.photo_count += 1; return { success: true, message: '写真をGBPにアップロードしました（モック）', category: input.category, photo_count: STORE.photo_count }; }
+  if (name === 'get_store_info') return { ...STORE };
+  if (name === 'update_store_info') { if (input.field in STORE) { STORE[input.field] = input.value; return { success: true, field: input.field, new_value: input.value, message: 'GBPの店舗情報を更新しました（モック）' }; } return { success: false, error: '不明なフィールド' }; }
+  if (name === 'get_keyword_rankings') return { keywords: [{ keyword: '焼肉 渋谷', rank: 3, prev_rank: 5, trend: '↑' }, { keyword: '焼肉 個室 渋谷', rank: 1, prev_rank: 1, trend: '→' }, { keyword: '和牛 渋谷', rank: 7, prev_rank: 6, trend: '↓' }, { keyword: '焼肉 渋谷 デート', rank: 4, prev_rank: 8, trend: '↑' }], measured_at: new Date().toISOString().slice(0,10) };
+  if (name === 'get_monthly_report') return { month: input.month || '直近30日', search_impressions: 1240, map_impressions: 830, website_clicks: 95, direction_requests: 42, phone_calls: 18, photo_views: 3200, review_count: 12, avg_rating: 4.2, top_keyword: '焼肉 渋谷（3位）', action_plan: ['週1回以上の投稿を維持する', '苦情口コミへの返信を24時間以内に行う', '写真を月2枚以上追加する'] };
+  return { error: '未知のツール: ' + name };
+}
+
+// ============================================================
+// Claude API
+// ============================================================
+const SYSTEM_PROMPT = `あなたは「MEOコンシェルジュ」です。
+店舗オーナーのLINEの相棒として、Google ビジネスプロフィール（GBP）の管理を全面的にサポートします。
+
+担当店舗: 焼肉 大将（焼肉店）
+
+## できること
+- 口コミ返信の生成・投稿
+- GBP投稿の提案・公開
+- 集客データ（インサイト）の分析
+- 写真のGBPへのアップロード（カテゴリ: FOOD/INTERIOR/EXTERIOR/TEAM）
+- 店舗情報の変更（住所・業種・電話・営業時間・定休日・紹介文・URL）
+- キーワード検索順位の確認
+- 月次レポートの生成
+- AI画像生成の提案（DALL-E 3）
+
+## 写真受信時の対応
+ユーザーが写真を送ってきたら:
+1. 写真の内容を一言コメント（料理・内観・外観・スタッフなどを判断）
+2. GBPのカテゴリを提案（FOOD/INTERIOR/EXTERIOR/TEAM）
+3. 「このカテゴリでGBPに追加しますか？」と確認
+4. 承認されたら upload_photo_to_gbp ツールを呼んでアップロード完了を報告
+
+## 店舗情報変更の対応
+1. 変更したい項目を確認
+2. get_store_info で現在値を取得して提示
+3. 新しい値を確認
+4. 「GBPに反映しますか？」と確認
+5. 承認されたら update_store_info で更新して完了を報告
+
+## 行動原則
+1. 短く・具体的に：LINEで読むことを意識して返答は簡潔に
+2. 行動を促す：提案後は「承認しますか？」「投稿しましょうか？」と次のアクションを明示
+3. 感情を汲む：苦情口コミは特に丁寧に扱う
+4. ツールを使う：情報が必要な場合は必ずツールを呼び出す
+
+## 返答スタイル
+- 絵文字を適度に使って親しみやすく
+- 口コミ返信文・投稿案は「」で囲んで提示する
+- 選択肢がある場合は番号リストで提示する`;
+
+let conversationHistory = [];
+let pendingPhotoBase64 = null;
+let pendingPhotoMime = null;
+
+async function callClaude(userMessage, imageBase64, imageMime) {
+  const apiKey = localStorage.getItem('anthropic_api_key');
+  if (!apiKey) { showApiModal(); return null; }
+
+  let userContent;
+  if (imageBase64) {
+    userContent = [
+      { type: 'image', source: { type: 'base64', media_type: imageMime, data: imageBase64 } },
+      { type: 'text', text: userMessage || '写真を送りました。GBPに追加してください。' }
+    ];
+  } else {
+    userContent = userMessage;
   }
-  ANTHROPIC_KEY = key;
-  localStorage.setItem('meo_demo_key', key);
-  document.getElementById('apiModal').style.display = 'none';
-  document.getElementById('appHeader').style.display = 'flex';
-  document.getElementById('quickActions').style.display = 'block';
-  document.getElementById('chatWrap').style.display = 'flex';
-  document.getElementById('inputArea').style.display = 'flex';
-  addDateDivider('今日');
-  addBotMsg(
-`こんにちは！MEOコンシェルジュです 🤖
+  conversationHistory.push({ role: 'user', content: userContent });
 
-**焼肉 大将** のGBP管理をサポートします。
+  const toolsCalled = [];
+  let messages = [...conversationHistory];
 
-できることをいくつか紹介しますね👇
-
-📬 **口コミ返信** — 新しい口コミを確認して返信文を自動生成
-📝 **GBP投稿** — 集客につながる投稿案を提案・公開
-📊 **データ分析** — インサイトをわかりやすく解説
-📸 **写真追加** — 写真を送るだけでGBPにアップロード
-✏️ **店舗情報変更** — 住所・営業時間など情報をここで変更
-📍 **キーワード順位** — 週次の検索順位を確認
-
-上のショートカットか、自由にメッセージを送ってください！`
-  );
-}
-
-// ===================== SYSTEM PROMPT =====================
-function buildSystemPrompt() {
-  return `あなたは「MEOコンシェルジュ」というAIです。
-Googleビジネスプロフィール（GBP）の管理をLINEライクなチャットUIでサポートします。
-
-## 担当店舗情報（現在の登録内容）
-店舗名: ${storeInfo.name}
-業種: ${storeInfo.category}
-住所: ${storeInfo.address}
-電話: ${storeInfo.phone}
-URL: ${storeInfo.url}
-定休日: ${storeInfo.holiday}
-営業時間:
-  月: ${storeInfo.hours.mon}
-  火: ${storeInfo.hours.tue}
-  水: ${storeInfo.hours.wed}
-  木: ${storeInfo.hours.thu}
-  金: ${storeInfo.hours.fri}
-  土: ${storeInfo.hours.sat}
-  日: ${storeInfo.hours.sun}
-紹介文: ${storeInfo.description}
-登録写真数: ${storeInfo.photos}枚
-
-## あなたができること（デモとして疑似的に実行してください）
-1. **口コミ返信**: 未返信口コミをリストアップし、返信案を生成。「投稿して」と言われたらGBPに投稿完了を伝える
-2. **GBP投稿**: 季節・業種に合った投稿案を生成。「投稿して」と言われたら投稿完了を伝える
-3. **データ分析**: インサイト（検索数・マップ表示・クリック数など）を疑似データで解説
-4. **写真管理**: ユーザーが写真を送ったとき、「GBPの写真フォルダに追加しました」と伝える（写真カテゴリ: 内観・外観・料理・チームなどを確認）
-5. **店舗情報変更**: ユーザーが「店舗情報を変更したい」と言ったら、変更したい項目（住所/業種/電話/営業時間/定休日/紹介文/URL）を聞き、新しい内容を確認し、最後に確定してもらう。確定後はGBPに反映完了を伝える。営業時間は曜日ごとに聞く
-6. **キーワード順位**: 「焼肉 渋谷」など登録キーワードの疑似順位データを提示
-7. **月次レポート**: 先月の集客データサマリーとアクションプランを提示
-8. **AI画像生成**: DALL-E 3で生成するイメージを説明し、GBP投稿用に使えることを伝える
-
-## 重要なルール
-- 口コミ返信・写真アップロード・投稿公開は、必ず「確認してから実行」するステップを踏む
-- 店舗情報変更時は、変更内容を必ず確認してから「GBPに反映しますか？」と聞く
-- 日本語で、LINE感覚の自然な会話口調で話す。絵文字を適度に使う
-- 返答は短めに。長い場合は分けて伝える
-- デモであることは隠さず、実際のGBPへのアクセスはないが、リアルな体験ができるよう演じる
-
-## 店舗情報変更の特別な出力フォーマット
-店舗情報の変更が確定したとき（ユーザーが「はい」「OK」「お願い」などと確定した場合）は、
-応答の末尾に以下のJSONタグを追加してください（ユーザーには見えません）:
-
-<STORE_UPDATE>{"field":"フィールドキー","value":"新しい値"}</STORE_UPDATE>
-
-フィールドキー: address, category, phone, url, holiday, description,
-hours_mon, hours_tue, hours_wed, hours_thu, hours_fri, hours_sat, hours_sun
-
-複数変更の場合は複数のタグを出力してください。`;
-}
-
-// ===================== SEND =====================
-async function sendMsg(text) {
-  if (isLoading) return;
-  const input = document.getElementById('chatInput');
-  const userText = text || input.value.trim();
-  if (!userText) return;
-  input.value = '';
-  autoResize(input);
-
-  addUserMsg(userText);
-  messages.push({ role: 'user', content: userText });
-  await callClaude();
-}
-
-function quickSend(text) { sendMsg(text); }
-
-async function callClaude() {
-  isLoading = true;
-  document.getElementById('sendBtn').disabled = true;
-  const typingId = addTyping();
-
-  try {
+  for (let round = 0; round < 6; round++) {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        system: buildSystemPrompt(),
-        messages: messages
-      })
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024, system: SYSTEM_PROMPT, tools: TOOLS, messages }),
     });
-
-    removeTyping(typingId);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 401) { localStorage.removeItem('anthropic_api_key'); showApiModal(); throw new Error('APIキーが無効です。再入力してください。'); }
+      throw new Error(err.error?.message || 'API Error ' + res.status);
+    }
     const data = await res.json();
-
-    if (data.error) {
-      addBotMsg('⚠️ エラー: ' + data.error.message);
-      return;
+    if (data.stop_reason === 'end_turn') {
+      const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
+      conversationHistory.push({ role: 'assistant', content: text });
+      return { text, toolsCalled };
     }
-
-    const raw = data.content[0].text;
-    
-    // STORE_UPDATE タグを処理
-    const updateMatches = [...raw.matchAll(/<STORE_UPDATE>(.*?)<\/STORE_UPDATE>/g)];
-    let displayText = raw.replace(/<STORE_UPDATE>.*?<\/STORE_UPDATE>/g, '').trim();
-    
-    addBotMsg(displayText);
-    messages.push({ role: 'assistant', content: raw });
-
-    // 店舗情報を更新
-    for (const match of updateMatches) {
-      try {
-        const update = JSON.parse(match[1]);
-        applyStoreUpdate(update.field, update.value);
-      } catch(e) {}
+    if (data.stop_reason === 'tool_use') {
+      messages.push({ role: 'assistant', content: data.content });
+      const results = [];
+      for (const block of data.content) {
+        if (block.type !== 'tool_use') continue;
+        toolsCalled.push(block.name);
+        results.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(executeTool(block.name, block.input||{})) });
+      }
+      messages.push({ role: 'user', content: results });
+      continue;
     }
-
-  } catch(e) {
-    removeTyping(typingId);
-    addBotMsg('⚠️ 通信エラーが発生しました。APIキーを確認してください。');
-  } finally {
-    isLoading = false;
-    document.getElementById('sendBtn').disabled = false;
+    break;
   }
+  throw new Error('エージェントループが最大回数を超えました');
 }
 
-function applyStoreUpdate(field, value) {
-  if (field === 'address') storeInfo.address = value;
-  else if (field === 'category') storeInfo.category = value;
-  else if (field === 'phone') storeInfo.phone = value;
-  else if (field === 'url') storeInfo.url = value;
-  else if (field === 'holiday') storeInfo.holiday = value;
-  else if (field === 'description') storeInfo.description = value;
-  else if (field.startsWith('hours_')) {
-    const day = field.replace('hours_', '');
-    storeInfo.hours[day] = value;
+// ============================================================
+// UI
+// ============================================================
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function nowStr() { return new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }); }
+
+const BOT_AVATAR_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><circle cx="9" cy="14" r="1.5" fill="white" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="white" stroke="none"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><line x1="12" y1="3" x2="12" y2="4"/></svg>';
+
+function addMessage(role, text, toolsCalled, imageDataUrl) {
+  const el = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg ' + role;
+  const chipsHtml = (toolsCalled && toolsCalled.length)
+    ? '<div class="tool-chips">' + toolsCalled.map(t => '<span class="tool-chip">' + t + '</span>').join('') + '</div>' : '';
+  const imgHtml = imageDataUrl ? '<img src="' + imageDataUrl + '" class="photo-preview" alt="送信した写真">' : '';
+  if (role === 'bot') {
+    wrap.innerHTML = '<div class="msg-avatar">' + BOT_AVATAR_SVG + '</div><div class="bubble-wrap"><div class="bubble">' + esc(text) + '</div>' + chipsHtml + '<div class="timestamp">' + nowStr() + '</div></div>';
+  } else {
+    const textHtml = text ? esc(text) : '';
+    wrap.innerHTML = '<div class="bubble-wrap"><div class="bubble">' + imgHtml + textHtml + '</div><div class="timestamp">' + nowStr() + '</div></div>';
   }
+  el.appendChild(wrap);
+  el.scrollTop = el.scrollHeight;
+  return wrap;
 }
 
-// ===================== PHOTO UPLOAD =====================
-function uploadPhoto() {
-  document.getElementById('photoInput').click();
+function addLoading() {
+  const el = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg bot loading';
+  wrap.innerHTML = '<div class="msg-avatar">' + BOT_AVATAR_SVG + '</div><div class="bubble-wrap"><div class="bubble">入力中…</div></div>';
+  el.appendChild(wrap);
+  el.scrollTop = el.scrollHeight;
+  return wrap;
 }
 
-async function handlePhotoUpload(event) {
+async function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  const hasPhoto = pendingPhotoBase64 !== null;
+  if (!text && !hasPhoto) return;
+
+  const sendBtn = document.getElementById('sendBtn');
+  input.value = ''; autoResize(input);
+  sendBtn.disabled = true;
+
+  const photoUrl = hasPhoto ? 'data:' + pendingPhotoMime + ';base64,' + pendingPhotoBase64 : null;
+  addMessage('user', text, null, photoUrl);
+
+  const b64 = pendingPhotoBase64;
+  const mime = pendingPhotoMime;
+  pendingPhotoBase64 = null;
+  pendingPhotoMime = null;
+
+  const loading = addLoading();
+  try {
+    const result = await callClaude(text || null, b64, mime);
+    loading.remove();
+    if (result) addMessage('bot', result.text, result.toolsCalled);
+  } catch (e) {
+    loading.remove();
+    addMessage('bot', 'エラー: ' + e.message);
+  }
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+function sendQuick(text) { document.getElementById('msgInput').value = text; sendMessage(); }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 96) + 'px'; }
+function scrollQuickBtns(dir) { document.getElementById('quickBtns').scrollBy({ left: 160 * dir, behavior: 'smooth' }); }
+
+function triggerPhotoUpload() { document.getElementById('photoFileInput').click(); }
+function handlePhotoSelected(event) {
   const file = event.target.files[0];
   if (!file) return;
   event.target.value = '';
-
   const reader = new FileReader();
-  reader.onload = async (e) => {
+  reader.onload = function(e) {
     const dataUrl = e.target.result;
-    
-    // ユーザー側に写真プレビューを表示
-    addPhotoMsg(dataUrl, file.name);
-    
-    // Claudeへ: base64付きでリクエスト
-    const base64 = dataUrl.split(',')[1];
-    const mimeType = file.type || 'image/jpeg';
-    
-    messages.push({
-      role: 'user',
-      content: [
-        {
-          type: 'image',
-          source: { type: 'base64', media_type: mimeType, data: base64 }
-        },
-        {
-          type: 'text',
-          text: '写真を送りました。GBPに追加してください。'
-        }
-      ]
-    });
-
-    await callClaudePhoto();
+    pendingPhotoBase64 = dataUrl.split(',')[1];
+    pendingPhotoMime = file.type || 'image/jpeg';
+    sendMessage();
   };
   reader.readAsDataURL(file);
 }
 
-async function callClaudePhoto() {
-  isLoading = true;
-  document.getElementById('sendBtn').disabled = true;
-  const typingId = addTyping();
+function showApiModal() { document.getElementById('apiModal').classList.remove('hidden'); }
+function saveApiKey() {
+  const key = document.getElementById('apiKeyInput').value.trim();
+  if (!key.startsWith('sk-ant-')) { alert('正しいAnthropicのAPIキーを入力してください（sk-ant- で始まるもの）'); return; }
+  localStorage.setItem('anthropic_api_key', key);
+  document.getElementById('apiModal').classList.add('hidden');
+  showWelcome();
+}
+function clearApiKey() { if (confirm('APIキーをリセットしますか？')) { localStorage.removeItem('anthropic_api_key'); showApiModal(); } }
 
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        system: buildSystemPrompt() + `
-        
-## 写真受信時の特別指示
-ユーザーから写真が送られてきました。以下の手順で対応してください:
-1. 写真の内容を一言説明（料理・内観・外観・スタッフなど何の写真か）
-2. GBPの写真カテゴリを提案（「料理」「内観」「外観」「チーム」など）
-3. 「このカテゴリでGBPに追加しますか？」と確認
-4. ユーザーが確定したら「✅ GBPの写真フォルダに追加しました！登録枚数: ${storeInfo.photos + 1}枚」と伝える
-`,
-        messages: messages
-      })
-    });
-
-    removeTyping(typingId);
-    const data = await res.json();
-    const raw = data.content[0].text;
-    addBotMsg(raw);
-    messages.push({ role: 'assistant', content: raw });
-    
-    // 追加ボタン付きメッセージを処理
-    if (raw.includes('追加しますか') || raw.includes('アップロードしますか')) {
-      addPhotoConfirmButtons();
-    }
-
-  } catch(e) {
-    removeTyping(typingId);
-    addBotMsg('⚠️ エラーが発生しました。');
-  } finally {
-    isLoading = false;
-    document.getElementById('sendBtn').disabled = false;
-  }
+function showWelcome() {
+  addMessage('bot', 'こんにちは！MEOコンシェルジュです😊\n店舗「焼肉 大将」のGBP管理をサポートします。\n\n口コミ返信・投稿作成・データ確認など、何でもお気軽にどうぞ！\n\n📸 写真を送るとGBPの写真フォルダに追加できます。\n✏️ 住所・営業時間などの店舗情報変更もここで完結します。\n\n💡 下のボタンからよく使う機能をすぐに試せます。');
 }
 
-// ===================== DOM HELPERS =====================
-function addDateDivider(text) {
-  const chat = document.getElementById('chatWrap');
-  const d = document.createElement('div');
-  d.className = 'date-divider';
-  d.textContent = text;
-  chat.appendChild(d);
-}
-
-function addUserMsg(text) {
-  const chat = document.getElementById('chatWrap');
-  const msg = document.createElement('div');
-  msg.className = 'msg user';
-  msg.innerHTML = `
-    <div class="avatar">👤</div>
-    <div class="bubble">${escHtml(text)}</div>
-  `;
-  chat.appendChild(msg);
-  scrollBottom();
-}
-
-function addPhotoMsg(dataUrl, name) {
-  const chat = document.getElementById('chatWrap');
-  const msg = document.createElement('div');
-  msg.className = 'msg user';
-  msg.innerHTML = `
-    <div class="avatar">👤</div>
-    <div class="bubble">
-      <div style="font-size:0.78rem;margin-bottom:6px;opacity:0.8">📷 ${escHtml(name)}</div>
-      <img src="${dataUrl}" class="img-preview" alt="upload">
-    </div>
-  `;
-  chat.appendChild(msg);
-  scrollBottom();
-}
-
-function addPhotoConfirmButtons() {
-  const chat = document.getElementById('chatWrap');
-  const wrap = document.createElement('div');
-  wrap.className = 'msg user';
-  wrap.style.justifyContent = 'flex-end';
-  wrap.innerHTML = `
-    <div class="bubble-actions" style="margin:0 0 0 auto">
-      <button class="bub-btn" onclick="quickSend('料理カテゴリで追加して')">料理で追加</button>
-      <button class="bub-btn" onclick="quickSend('内観カテゴリで追加して')">内観で追加</button>
-      <button class="bub-btn" onclick="quickSend('外観カテゴリで追加して')">外観で追加</button>
-    </div>
-  `;
-  chat.appendChild(wrap);
-  scrollBottom();
-}
-
-function addBotMsg(text) {
-  const chat = document.getElementById('chatWrap');
-  const msg = document.createElement('div');
-  msg.className = 'msg bot';
-  const formatted = formatText(text);
-  msg.innerHTML = `
-    <div class="avatar">🤖</div>
-    <div class="bubble">${formatted}</div>
-  `;
-  chat.appendChild(msg);
-  scrollBottom();
-}
-
-function addTyping() {
-  const chat = document.getElementById('chatWrap');
-  const id = 'typing_' + Date.now();
-  const msg = document.createElement('div');
-  msg.className = 'msg bot';
-  msg.id = id;
-  msg.innerHTML = `
-    <div class="avatar">🤖</div>
-    <div class="typing-bubble"><span></span><span></span><span></span></div>
-  `;
-  chat.appendChild(msg);
-  scrollBottom();
-  return id;
-}
-
-function removeTyping(id) {
-  const el = document.getElementById(id);
-  if (el) el.remove();
-}
-
-function scrollBottom() {
-  const chat = document.getElementById('chatWrap');
-  setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 50);
-}
-
-function escHtml(t) {
-  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function formatText(text) {
-  // **bold**
-  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  // *italic*
-  text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
-  // line breaks
-  text = text.replace(/\n/g, '<br>');
-  return text;
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
-// ===================== AUTO-LOAD KEY =====================
-window.addEventListener('load', () => {
-  const saved = localStorage.getItem('meo_demo_key');
-  if (saved) {
-    document.getElementById('apiKeyInput').value = saved;
-  }
+window.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('quickBtns').addEventListener('wheel', function(e) {
+    if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; }
+  }, { passive: false });
+  localStorage.getItem('anthropic_api_key') ? showWelcome() : showApiModal();
 });
 </script>
 </body>
