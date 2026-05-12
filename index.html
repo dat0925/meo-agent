@@ -3,164 +3,219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GBP コンシェルジュ — デモ</title>
+<title>MEOコンシェルジュ — デモ</title>
 <style>
+:root {
+  --green: #1a7a4a;
+  --green-dark: #145f3a;
+  --green-light: #f0f7f3;
+  --green-mid: rgba(26,122,74,.15);
+  --bg-chat: #f2f4f6;
+  --white: #ffffff;
+  --text: #1c1c1e;
+  --text-mid: #6e6e73;
+  --border: #e4e4e8;
+  --radius: 18px;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', sans-serif;
-  background: #e8eff5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+  background: #d8dde3;
   display: flex; justify-content: center; align-items: center;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ---- モーダル（APIキー入力）---- */
+/* ---- モーダル ---- */
 .modal-overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.55);
-  display: flex; justify-content: center; align-items: center; z-index: 100;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(8px);
+  display: flex; justify-content: center; align-items: center; z-index: 200;
 }
 .modal-overlay.hidden { display: none; }
 .modal {
-  background: white; border-radius: 16px; padding: 32px 28px;
-  width: 90%; max-width: 400px; box-shadow: 0 8px 40px rgba(0,0,0,.2);
+  background: white; border-radius: 20px; padding: 36px 32px;
+  width: 90%; max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.25);
 }
-.modal h2 { font-size: 18px; margin-bottom: 8px; }
-.modal p { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.6; }
+.modal-icon {
+  width: 52px; height: 52px; background: var(--green-light);
+  border-radius: 14px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+}
+.modal-icon svg { width: 26px; height: 26px; }
+.modal h2 { font-size: 17px; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.modal p { font-size: 13px; color: var(--text-mid); margin-bottom: 20px; line-height: 1.65; }
 .modal input {
-  width: 100%; padding: 10px 14px; border: 1px solid #ddd;
-  border-radius: 8px; font-size: 14px; margin-bottom: 12px; outline: none;
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 14px; margin-bottom: 12px; outline: none;
+  transition: border-color .15s; font-family: inherit; color: var(--text);
 }
-.modal input:focus { border-color: #06c755; }
-.modal button {
-  width: 100%; padding: 12px; background: #06c755; color: white;
-  border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
-  cursor: pointer;
+.modal input:focus { border-color: var(--green); }
+.modal-btn {
+  width: 100%; padding: 13px; background: var(--green); color: white;
+  border: none; border-radius: 10px; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: opacity .15s; font-family: inherit;
 }
-.modal button:hover { background: #05b84c; }
-.modal .note {
-  font-size: 11px; color: #999; margin-top: 10px; text-align: center;
-}
+.modal-btn:hover { opacity: .88; }
+.modal-note { font-size: 11px; color: var(--text-mid); margin-top: 10px; text-align: center; }
+.modal-note a { color: var(--green); text-decoration: none; }
 
-/* ---- チャット画面 ---- */
+/* ---- チャットコンテナ ---- */
 .container {
-  width: 100%; max-width: 480px; height: 100svh;
-  display: flex; flex-direction: column; background: #fff;
-  box-shadow: 0 0 30px rgba(0,0,0,.15);
+  width: 100%; max-width: 460px; height: 100svh;
+  display: flex; flex-direction: column; background: var(--bg-chat);
+  box-shadow: 0 0 60px rgba(0,0,0,.2);
+  overflow: hidden;
 }
 
+/* ---- ヘッダー ---- */
 .header {
-  background: #06c755; color: white;
-  padding: 14px 18px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
   display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
 }
 .header-left { display: flex; align-items: center; gap: 10px; }
-.header h1 { font-size: 15px; font-weight: 700; }
-.header .sub { font-size: 11px; opacity: .8; margin-top: 1px; }
-.header-badge {
-  background: rgba(255,255,255,.25); border-radius: 6px;
-  padding: 2px 8px; font-size: 11px;
+.bot-avatar {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: linear-gradient(135deg, #1a7a4a, #2eb872);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
-.header-btn {
-  background: none; border: none; color: white; cursor: pointer;
-  font-size: 18px; padding: 4px; opacity: .8;
+.bot-avatar svg { width: 22px; height: 22px; }
+.header-info { }
+.header-name {
+  font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.2;
+  display: flex; align-items: center; gap: 6px;
 }
-.header-btn:hover { opacity: 1; }
+.online-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #34c759;
+  display: inline-block; flex-shrink: 0;
+}
+.header-sub { font-size: 11px; color: var(--text-mid); margin-top: 1px; }
+.header-demo-badge {
+  background: var(--green-light); color: var(--green);
+  border: 1px solid rgba(26,122,74,.2);
+  border-radius: 6px; padding: 2px 8px; font-size: 10px; font-weight: 700;
+  letter-spacing: .04em;
+}
+.header-actions { display: flex; align-items: center; gap: 4px; }
+.header-icon-btn {
+  width: 34px; height: 34px; border-radius: 8px; border: none;
+  background: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: var(--text-mid); transition: background .15s;
+  text-decoration: none;
+}
+.header-icon-btn:hover { background: var(--green-light); color: var(--green); }
+.header-icon-btn svg { width: 18px; height: 18px; }
 
+/* ---- メッセージエリア ---- */
 .messages {
-  flex: 1; overflow-y: auto; padding: 14px 12px;
-  display: flex; flex-direction: column; gap: 10px;
-  background: #e8eff5;
+  flex: 1; overflow-y: auto; padding: 16px 14px;
+  display: flex; flex-direction: column; gap: 12px;
+  scroll-behavior: smooth;
 }
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); border-radius: 2px; }
 
 .msg { display: flex; gap: 8px; align-items: flex-end; }
 .msg.user { flex-direction: row-reverse; }
 
-.avatar {
-  width: 34px; height: 34px; border-radius: 50%;
-  background: #06c755; display: flex; align-items: center;
-  justify-content: center; font-size: 17px; flex-shrink: 0;
+.msg-avatar {
+  width: 30px; height: 30px; border-radius: 10px;
+  background: linear-gradient(135deg, #1a7a4a, #2eb872);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
+.msg-avatar svg { width: 17px; height: 17px; }
 
-.bubble-wrap { display: flex; flex-direction: column; max-width: 78%; }
+.bubble-wrap { display: flex; flex-direction: column; max-width: 80%; }
 .msg.user .bubble-wrap { align-items: flex-end; }
 
 .bubble {
-  padding: 9px 13px; border-radius: 16px;
-  line-height: 1.65; font-size: 14px;
+  padding: 10px 14px; line-height: 1.65; font-size: 13.5px;
   white-space: pre-wrap; word-break: break-word;
 }
 .msg.bot .bubble {
-  background: white; border-bottom-left-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  background: var(--white); color: var(--text);
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
 }
 .msg.user .bubble {
-  background: #06c755; color: white; border-bottom-right-radius: 4px;
+  background: var(--green); color: white;
+  border-radius: 16px 16px 4px 16px;
 }
-.msg.loading .bubble { color: #aaa; font-style: italic; }
+.msg.loading .bubble { color: var(--text-mid); font-style: italic; }
 
-.tool-chips {
-  display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;
-}
+.tool-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
 .tool-chip {
-  font-size: 10px; background: #f0f9f3; color: #06c755;
-  border: 1px solid #cceedd; border-radius: 10px; padding: 1px 7px;
+  font-size: 10px; background: var(--green-light); color: var(--green);
+  border: 1px solid rgba(26,122,74,.2); border-radius: 100px; padding: 2px 8px;
+  font-weight: 600;
+}
+.timestamp { font-size: 10px; color: var(--text-mid); margin-top: 4px; }
+
+.date-divider {
+  align-self: center; font-size: 11px; color: var(--text-mid);
+  background: rgba(0,0,0,.07); border-radius: 100px;
+  padding: 3px 12px;
 }
 
-.timestamp {
-  font-size: 10px; color: #aaa; margin-top: 3px; padding: 0 2px;
-}
-
+/* ---- クイックボタン ---- */
 .quick-btns-wrap {
-  position: relative; background: white; border-top: 1px solid #eee;
-  display: flex; align-items: center;
+  background: var(--white); border-top: 1px solid var(--border);
+  display: flex; align-items: center; flex-shrink: 0;
 }
 .quick-btns {
-  flex: 1; padding: 8px 8px 8px 12px;
-  display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+  flex: 1; padding: 8px 10px 8px 14px;
+  display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none;
 }
 .quick-btns::-webkit-scrollbar { display: none; }
-.quick-scroll-btn {
-  flex-shrink: 0; width: 28px; height: 28px; margin-right: 6px;
-  background: white; border: 1.5px solid #ddd; border-radius: 50%;
-  font-size: 14px; cursor: pointer; display: flex;
-  align-items: center; justify-content: center; color: #666;
-  transition: border-color .15s, color .15s;
-}
-.quick-scroll-btn:hover { border-color: #06c755; color: #06c755; }
 .quick-btn {
-  white-space: nowrap; padding: 6px 13px;
-  border: 1.5px solid #06c755; color: #06c755;
-  border-radius: 16px; font-size: 12px; cursor: pointer;
-  background: white; flex-shrink: 0; transition: background .15s;
+  white-space: nowrap; padding: 6px 14px;
+  border: 1.5px solid var(--border); color: var(--text-mid);
+  border-radius: 100px; font-size: 12px; cursor: pointer;
+  background: var(--white); flex-shrink: 0;
+  transition: border-color .15s, color .15s, background .15s;
+  font-family: inherit;
 }
-.quick-btn:hover { background: #f0fff5; }
+.quick-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+.scroll-arrow {
+  flex-shrink: 0; width: 26px; height: 26px; margin-right: 8px;
+  background: none; border: 1px solid var(--border); border-radius: 50%;
+  font-size: 13px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center; color: var(--text-mid);
+  transition: all .15s;
+}
+.scroll-arrow:hover { border-color: var(--green); color: var(--green); }
 
+/* ---- 入力エリア ---- */
 .input-area {
-  padding: 10px 12px 12px; background: white;
-  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px 14px; background: var(--white);
+  border-top: 1px solid var(--border);
+  display: flex; align-items: flex-end; gap: 8px; flex-shrink: 0;
 }
 .input-area textarea {
   flex: 1; padding: 9px 14px;
-  border: 1.5px solid #ddd; border-radius: 20px;
+  border: 1.5px solid var(--border); border-radius: 20px;
   font-size: 14px; outline: none; resize: none;
-  max-height: 100px; line-height: 1.5;
-  font-family: inherit;
+  max-height: 96px; line-height: 1.5; font-family: inherit;
+  color: var(--text); background: var(--bg-chat);
+  transition: border-color .15s;
 }
-.input-area textarea:focus { border-color: #06c755; }
+.input-area textarea:focus { border-color: var(--green); background: white; }
 .send-btn {
-  background: #06c755; color: white; border: none;
-  border-radius: 50%; width: 40px; height: 40px;
-  font-size: 17px; cursor: pointer; flex-shrink: 0;
+  width: 38px; height: 38px; background: var(--green); color: white;
+  border: none; border-radius: 50%; cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  transition: background .15s;
+  transition: opacity .15s; flex-shrink: 0;
 }
-.send-btn:disabled { background: #ccc; cursor: default; }
-.send-btn:not(:disabled):hover { background: #05b84c; }
-
-.date-divider {
-  text-align: center; font-size: 11px; color: #999;
-  background: rgba(0,0,0,.06); border-radius: 10px;
-  padding: 3px 10px; align-self: center;
-}
+.send-btn svg { width: 16px; height: 16px; }
+.send-btn:disabled { background: var(--border); cursor: default; }
+.send-btn:not(:disabled):hover { opacity: .85; }
 </style>
 </head>
 <body>
@@ -168,32 +223,68 @@ body {
 <!-- APIキー入力モーダル -->
 <div class="modal-overlay" id="apiModal">
   <div class="modal">
-    <h2>🔑 Anthropic APIキーを入力</h2>
-    <p>このデモはブラウザから直接 Claude API を呼び出します。<br>
-       APIキーはお使いのブラウザにのみ保存され、外部には送信されません。</p>
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#1a7a4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+      </svg>
+    </div>
+    <h2>APIキーを入力してください</h2>
+    <p>このデモはブラウザから直接 Claude API を呼び出します。入力したキーはブラウザにのみ保存され、外部には送信されません。</p>
     <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
-    <button onclick="saveApiKey()">デモを開始する</button>
-    <p class="note">※ APIキーは <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> で取得できます</p>
+    <button class="modal-btn" onclick="saveApiKey()">デモを開始する</button>
+    <p class="modal-note"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> でAPIキーを取得できます</p>
   </div>
 </div>
 
 <!-- チャット画面 -->
 <div class="container">
+
+  <!-- ヘッダー -->
   <div class="header">
     <div class="header-left">
-      <div>
-        <div class="header h1" style="font-size:15px;font-weight:700;">🤖 GBPコンシェルジュ</div>
-        <div class="sub" style="font-size:11px;opacity:.8;margin-top:1px;">焼肉 大将</div>
+      <div class="bot-avatar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="8" width="18" height="12" rx="3"/>
+          <circle cx="9" cy="14" r="1.5" fill="white" stroke="none"/>
+          <circle cx="15" cy="14" r="1.5" fill="white" stroke="none"/>
+          <path d="M8 8V6a4 4 0 0 1 8 0v2"/>
+          <line x1="12" y1="3" x2="12" y2="4"/>
+        </svg>
       </div>
-      <span class="header-badge">DEMO</span>
+      <div class="header-info">
+        <div class="header-name">
+          MEOコンシェルジュ
+          <span class="online-dot"></span>
+        </div>
+        <div class="header-sub">焼肉 大将 ・ デモモード</div>
+      </div>
+      <span class="header-demo-badge">DEMO</span>
     </div>
-    <button class="header-btn" onclick="clearApiKey()" title="APIキーを変更">⚙️</button>
+    <div class="header-actions">
+      <!-- サービスサイトへのリンク -->
+      <a href="https://dat0925.github.io/meo-agent-lp/" target="_blank"
+         class="header-icon-btn" title="サービスサイトを見る">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8l4 4-4 4M8 12h8"/>
+        </svg>
+      </a>
+      <!-- 設定 -->
+      <button class="header-icon-btn" onclick="clearApiKey()" title="APIキーを変更">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
+        </svg>
+      </button>
+    </div>
   </div>
 
+  <!-- メッセージ -->
   <div class="messages" id="messages">
     <div class="date-divider">今日</div>
   </div>
 
+  <!-- クイックボタン -->
   <div class="quick-btns-wrap">
     <div class="quick-btns" id="quickBtns">
       <button class="quick-btn" onclick="sendQuick('未返信の口コミを見せて')">📬 未返信口コミ</button>
@@ -203,13 +294,18 @@ body {
       <button class="quick-btn" onclick="sendQuick('写真の状況は？')">📸 写真確認</button>
       <button class="quick-btn" onclick="sendQuick('苦情口コミへの返信文を作って')">⚠️ 苦情対応</button>
     </div>
-    <button class="quick-scroll-btn" onclick="scrollQuickBtns()">›</button>
+    <button class="scroll-arrow" onclick="scrollQuickBtns()">›</button>
   </div>
 
+  <!-- 入力 -->
   <div class="input-area">
     <textarea id="msgInput" placeholder="メッセージを入力..." rows="1"
       onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
-    <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
   </div>
 </div>
 
@@ -217,218 +313,54 @@ body {
 // ============================================================
 // モックデータ
 // ============================================================
-const STORE = {
-  name: '焼肉 大将',
-  category: '焼肉店',
-  location_id: 'locations/mock-001',
-};
+const STORE = { name: '焼肉 大将', category: '焼肉店', location_id: 'locations/mock-001' };
 
 const MOCK_REVIEWS = [
-  { id: 'review-001', reviewer: '田中 太郎', stars: 5,
-    comment: 'お肉が柔らかくてとても美味しかったです！スタッフの方も親切で、また来ます。', replied: false },
-  { id: 'review-002', reviewer: '佐藤 花子', stars: 4,
-    comment: 'コスパが良く満足しています。少し煙が気になりました。', replied: false },
-  { id: 'review-003', reviewer: '山田 次郎', stars: 2,
-    comment: '注文してから30分以上待たされました。改善をお願いします。', replied: false },
+  { id: 'review-001', reviewer: '田中 太郎', stars: 5, comment: 'お肉が柔らかくてとても美味しかったです！スタッフの方も親切で、また来ます。', replied: false },
+  { id: 'review-002', reviewer: '佐藤 花子', stars: 4, comment: 'コスパが良く満足しています。少し煙が気になりました。', replied: false },
+  { id: 'review-003', reviewer: '山田 次郎', stars: 2, comment: '注文してから30分以上待たされました。改善をお願いします。', replied: false },
 ];
 let reviews = MOCK_REVIEWS.map(r => ({...r}));
 
+function daysAgo(n) { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0,10); }
 const MOCK_POSTS = [
-  { id: 'post-001', text: '【週末限定】黒毛和牛カルビが10%オフ！この機会をお見逃しなく🔥',
-    date: daysAgo(35), status: 'published' },
+  { id: 'post-001', text: '【週末限定】黒毛和牛カルビが10%オフ！この機会をお見逃しなく🔥', date: daysAgo(35), status: 'published' },
 ];
 let posts = MOCK_POSTS.map(p => ({...p}));
-
-function daysAgo(n) {
-  const d = new Date(); d.setDate(d.getDate() - n);
-  return d.toISOString().slice(0,10);
-}
 
 // ============================================================
 // Tool 定義
 // ============================================================
 const TOOLS = [
-  {
-    name: 'get_gbp_stats',
-    description: 'GBPの集客データ（検索表示数・クリック数・写真閲覧数など）を取得します。',
-    input_schema: { type: 'object', properties: {}, required: [] },
-  },
-  {
-    name: 'get_unanswered_reviews',
-    description: '未返信の口コミ一覧を取得します。',
-    input_schema: { type: 'object', properties: {}, required: [] },
-  },
-  {
-    name: 'reply_to_review',
-    description: '指定した口コミにオーナー返信を投稿します。',
-    input_schema: {
-      type: 'object',
-      properties: {
-        review_id: { type: 'string', description: '返信する口コミのID' },
-        reply_text: { type: 'string', description: '返信文' },
-      },
-      required: ['review_id', 'reply_text'],
-    },
-  },
-  {
-    name: 'create_gbp_post',
-    description: 'GBPに投稿を作成・公開します。',
-    input_schema: {
-      type: 'object',
-      properties: {
-        text: { type: 'string', description: '投稿テキスト' },
-        cta_type: { type: 'string', description: 'CTAボタン種別' },
-        cta_url: { type: 'string', description: 'CTAリンクURL' },
-      },
-      required: ['text'],
-    },
-  },
-  {
-    name: 'get_posts_history',
-    description: '過去のGBP投稿一覧と最終投稿日を取得します。',
-    input_schema: {
-      type: 'object',
-      properties: { limit: { type: 'integer' } },
-      required: [],
-    },
-  },
-  {
-    name: 'generate_post_draft',
-    description: '業種・季節・テーマに合わせたGBP投稿案を複数生成します。',
-    input_schema: {
-      type: 'object',
-      properties: {
-        theme: { type: 'string', description: '投稿テーマ' },
-        count: { type: 'integer', description: '生成する案の数（デフォルト3）' },
-      },
-      required: [],
-    },
-  },
-  {
-    name: 'generate_review_reply',
-    description: '口コミ内容に基づいた返信文を生成します。',
-    input_schema: {
-      type: 'object',
-      properties: {
-        review_id: { type: 'string', description: '対象口コミID' },
-      },
-      required: ['review_id'],
-    },
-  },
-  {
-    name: 'upload_photo_to_gbp',
-    description: '写真をGBPに追加します。',
-    input_schema: {
-      type: 'object',
-      properties: {
-        category: { type: 'string', description: '写真カテゴリ（FOOD/INTERIOR/EXTERIOR/TEAM）' },
-      },
-      required: [],
-    },
-  },
+  { name: 'get_gbp_stats', description: 'GBPの集客データを取得します。', input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'get_unanswered_reviews', description: '未返信の口コミ一覧を取得します。', input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'reply_to_review', description: '口コミに返信を投稿します。', input_schema: { type: 'object', properties: { review_id: { type: 'string' }, reply_text: { type: 'string' } }, required: ['review_id', 'reply_text'] } },
+  { name: 'create_gbp_post', description: 'GBPに投稿を公開します。', input_schema: { type: 'object', properties: { text: { type: 'string' }, cta_type: { type: 'string' }, cta_url: { type: 'string' } }, required: ['text'] } },
+  { name: 'get_posts_history', description: '過去のGBP投稿一覧を取得します。', input_schema: { type: 'object', properties: { limit: { type: 'integer' } }, required: [] } },
+  { name: 'generate_post_draft', description: '投稿案を複数生成します。', input_schema: { type: 'object', properties: { theme: { type: 'string' }, count: { type: 'integer' } }, required: [] } },
+  { name: 'generate_review_reply', description: '口コミへの返信文を生成します。', input_schema: { type: 'object', properties: { review_id: { type: 'string' } }, required: ['review_id'] } },
+  { name: 'upload_photo_to_gbp', description: '写真をGBPに追加します。', input_schema: { type: 'object', properties: { category: { type: 'string' } }, required: [] } },
 ];
 
 // ============================================================
 // Tool 実行
 // ============================================================
 function executeTool(name, input) {
-  if (name === 'get_gbp_stats') {
-    return {
-      period: '直近30日',
-      search_impressions: 1240, map_impressions: 830,
-      website_clicks: 95, direction_requests: 42,
-      phone_calls: 18, photo_views: 3200,
-    };
-  }
-
-  if (name === 'get_unanswered_reviews') {
-    const pending = reviews.filter(r => !r.replied);
-    return pending.map(r => ({
-      review_id: r.id, reviewer: r.reviewer,
-      stars: r.stars, comment: r.comment,
-    }));
-  }
-
-  if (name === 'reply_to_review') {
-    const r = reviews.find(r => r.id === input.review_id);
-    if (!r) return { success: false, error: '口コミが見つかりません' };
-    r.replied = true; r.reply_text = input.reply_text;
-    return { success: true, review_id: input.review_id,
-             message: '返信を投稿しました（モック）' };
-  }
-
-  if (name === 'create_gbp_post') {
-    const newPost = {
-      id: `post-${String(posts.length + 1).padStart(3,'0')}`,
-      text: input.text, date: new Date().toISOString().slice(0,10),
-      status: 'published',
-    };
-    posts.push(newPost);
-    return { success: true, post_id: newPost.id,
-             message: '投稿を公開しました（モック）',
-             text_preview: input.text.slice(0, 60) };
-  }
-
-  if (name === 'get_posts_history') {
-    const limit = input.limit || 10;
-    const sorted = [...posts].sort((a,b) => b.date.localeCompare(a.date));
-    const lastDate = sorted[0]?.date;
-    const daysSince = lastDate
-      ? Math.floor((Date.now() - new Date(lastDate)) / 86400000) : null;
-    return {
-      posts: sorted.slice(0, limit).map(p => ({
-        post_id: p.id,
-        text: p.text.length > 80 ? p.text.slice(0,80) + '...' : p.text,
-        published_at: p.date, status: p.status,
-      })),
-      total: posts.length,
-      last_post_at: lastDate || null,
-      days_since_last_post: daysSince,
-    };
-  }
-
-  if (name === 'generate_post_draft') {
-    const theme = input.theme || 'お店の魅力';
-    const count = input.count || 3;
-    const drafts = [
-      `【${theme}】焼肉 大将では、黒毛和牛をリーズナブルにご提供しています🐄 ご家族・ご友人との特別なひとときに、ぜひお越しください！`,
-      `🔥 ${theme}キャンペーン開催中！期間限定でドリンク1杯無料サービス中。詳しくはお店にお問い合わせください。`,
-      `✨ 焼肉 大将からのお知らせ：${theme}にぴったりのコースをご用意しました。ご予約はお電話またはWeb予約で承ります。`,
-      `🌟 ${theme}の季節になりました。当店自慢の熟成肉とともに、素敵なひとときをお過ごしください。スタッフ一同お待ちしております！`,
-    ];
-    return { drafts: drafts.slice(0, count), theme };
-  }
-
-  if (name === 'generate_review_reply') {
-    const r = reviews.find(r => r.id === input.review_id);
-    if (!r) return { error: '口コミが見つかりません' };
-    let reply;
-    if (r.stars >= 4) {
-      reply = `この度は温かいご口コミをいただき、誠にありがとうございます！${r.reviewer}様にまたお越しいただけることを、スタッフ一同心よりお待ちしております🙏`;
-    } else if (r.stars <= 2) {
-      reply = `この度はご不満をおかけし、大変申し訳ございませんでした。${r.reviewer}様のご意見を真摯に受け止め、改善に努めてまいります。またの機会にぜひお試しいただけますと幸いです。`;
-    } else {
-      reply = `ご来店いただき、誠にありがとうございます。${r.reviewer}様のご意見はスタッフ一同の励みとなっております。またのお越しを心よりお待ちしております。`;
-    }
-    return { review_id: input.review_id, suggested_reply: reply };
-  }
-
-  if (name === 'upload_photo_to_gbp') {
-    return {
-      success: true,
-      photo_id: `photo-${Date.now()}`,
-      message: '写真をGBPにアップロードしました（モック）',
-      category: input.category || 'FOOD',
-    };
-  }
-
+  if (name === 'get_gbp_stats') return { period: '直近30日', search_impressions: 1240, map_impressions: 830, website_clicks: 95, direction_requests: 42, phone_calls: 18, photo_views: 3200 };
+  if (name === 'get_unanswered_reviews') return reviews.filter(r => !r.replied).map(r => ({ review_id: r.id, reviewer: r.reviewer, stars: r.stars, comment: r.comment }));
+  if (name === 'reply_to_review') { const r = reviews.find(r => r.id === input.review_id); if (!r) return { success: false }; r.replied = true; r.reply_text = input.reply_text; return { success: true, review_id: input.review_id, message: '返信を投稿しました（モック）' }; }
+  if (name === 'create_gbp_post') { const p = { id: `post-${String(posts.length+1).padStart(3,'0')}`, text: input.text, date: new Date().toISOString().slice(0,10), status: 'published' }; posts.push(p); return { success: true, post_id: p.id, message: '投稿を公開しました（モック）' }; }
+  if (name === 'get_posts_history') { const sorted = [...posts].sort((a,b) => b.date.localeCompare(a.date)); const last = sorted[0]?.date; const days = last ? Math.floor((Date.now()-new Date(last))/86400000) : null; return { posts: sorted.slice(0, input.limit||10).map(p => ({ post_id: p.id, text: p.text.slice(0,80), published_at: p.date, status: p.status })), total: posts.length, last_post_at: last||null, days_since_last_post: days }; }
+  if (name === 'generate_post_draft') { const theme = input.theme||'お店の魅力'; const count = input.count||3; return { drafts: [`【${theme}】焼肉 大将では、黒毛和牛をリーズナブルにご提供しています🐄 ご家族・ご友人との特別なひとときに、ぜひお越しください！`, `🔥 ${theme}キャンペーン開催中！期間限定でドリンク1杯無料サービス中。詳しくはお店にお問い合わせください。`, `✨ ${theme}にぴったりのコースをご用意しました。ご予約はお電話またはWeb予約で承ります。`, `🌟 ${theme}の季節になりました。当店自慢の熟成肉とともに、素敵なひとときをお過ごしください！`].slice(0, count), theme }; }
+  if (name === 'generate_review_reply') { const r = reviews.find(r => r.id === input.review_id); if (!r) return { error: '口コミが見つかりません' }; let reply; if (r.stars >= 4) reply = `この度は温かいご口コミをいただき、誠にありがとうございます！${r.reviewer}様にまたお越しいただけることを、スタッフ一同心よりお待ちしております🙏`; else if (r.stars <= 2) reply = `この度はご不満をおかけし、大変申し訳ございませんでした。${r.reviewer}様のご意見を真摯に受け止め、改善に努めてまいります。またの機会にぜひお試しいただけますと幸いです。`; else reply = `ご来店いただき、誠にありがとうございます。${r.reviewer}様のご意見はスタッフ一同の励みとなっております。またのお越しを心よりお待ちしております。`; return { review_id: input.review_id, suggested_reply: reply }; }
+  if (name === 'upload_photo_to_gbp') return { success: true, photo_id: `photo-${Date.now()}`, message: '写真をGBPにアップロードしました（モック）', category: input.category||'FOOD' };
   return { error: `未知のツール: ${name}` };
 }
 
 // ============================================================
-// Claude API 呼び出し（Tool Calling ループ）
+// Claude API
 // ============================================================
-const SYSTEM_PROMPT = `あなたは「GBPコンシェルジュ」です。
+const SYSTEM_PROMPT = `あなたは「MEOコンシェルジュ」です。
 店舗オーナーのLINEの相棒として、Google ビジネスプロフィール（GBP）の管理を全面的にサポートします。
 
 担当店舗: 焼肉 大将（焼肉店）
@@ -449,115 +381,72 @@ let conversationHistory = [];
 async function callClaude(userMessage) {
   const apiKey = localStorage.getItem('anthropic_api_key');
   if (!apiKey) { showApiModal(); return null; }
-
   conversationHistory.push({ role: 'user', content: userMessage });
-
   const toolsCalled = [];
   let messages = [...conversationHistory];
 
   for (let round = 0; round < 5; round++) {
-    const body = {
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      tools: TOOLS,
-      messages,
-    };
-
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify(body),
+      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024, system: SYSTEM_PROMPT, tools: TOOLS, messages }),
     });
-
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      if (res.status === 401) {
-        localStorage.removeItem('anthropic_api_key');
-        showApiModal();
-        throw new Error('APIキーが無効です。再入力してください。');
-      }
+      if (res.status === 401) { localStorage.removeItem('anthropic_api_key'); showApiModal(); throw new Error('APIキーが無効です。再入力してください。'); }
       throw new Error(err.error?.message || `API Error ${res.status}`);
     }
-
     const data = await res.json();
-
-    // end_turn → テキストを返す
     if (data.stop_reason === 'end_turn') {
-      const text = data.content
-        .filter(b => b.type === 'text')
-        .map(b => b.text).join('\n').trim();
+      const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
       conversationHistory.push({ role: 'assistant', content: text });
       return { text, toolsCalled };
     }
-
-    // tool_use → ツールを実行
     if (data.stop_reason === 'tool_use') {
       messages.push({ role: 'assistant', content: data.content });
-
-      const toolResults = [];
+      const results = [];
       for (const block of data.content) {
         if (block.type !== 'tool_use') continue;
         toolsCalled.push(block.name);
-        const result = executeTool(block.name, block.input || {});
-        toolResults.push({
-          type: 'tool_result',
-          tool_use_id: block.id,
-          content: JSON.stringify(result),
-        });
+        results.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(executeTool(block.name, block.input||{})) });
       }
-      messages.push({ role: 'user', content: toolResults });
+      messages.push({ role: 'user', content: results });
       continue;
     }
-
     break;
   }
-
   throw new Error('エージェントループが最大回数を超えました');
 }
 
 // ============================================================
-// UI ヘルパー
+// UI
 // ============================================================
-function now() {
-  return new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
-}
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function nowStr() { return new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }); }
+
+const BOT_AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="3"/><circle cx="9" cy="14" r="1.5" fill="white" stroke="none"/><circle cx="15" cy="14" r="1.5" fill="white" stroke="none"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><line x1="12" y1="3" x2="12" y2="4"/></svg>`;
 
 function addMessage(role, text, toolsCalled) {
   const el = document.getElementById('messages');
-
   const wrap = document.createElement('div');
   wrap.className = `msg ${role}`;
-
-  const escapedText = text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-  const chipsHtml = (toolsCalled && toolsCalled.length)
-    ? `<div class="tool-chips">${toolsCalled.map(t =>
-        `<span class="tool-chip">🔧 ${t}</span>`).join('')}</div>`
-    : '';
-
+  const chipsHtml = (toolsCalled?.length)
+    ? `<div class="tool-chips">${toolsCalled.map(t => `<span class="tool-chip">${t}</span>`).join('')}</div>` : '';
   if (role === 'bot') {
     wrap.innerHTML = `
-      <div class="avatar">🤖</div>
+      <div class="msg-avatar">${BOT_AVATAR_SVG}</div>
       <div class="bubble-wrap">
-        <div class="bubble">${escapedText}</div>
+        <div class="bubble">${esc(text)}</div>
         ${chipsHtml}
-        <div class="timestamp">${now()}</div>
+        <div class="timestamp">${nowStr()}</div>
       </div>`;
   } else {
     wrap.innerHTML = `
       <div class="bubble-wrap">
-        <div class="bubble">${escapedText}</div>
-        <div class="timestamp">${now()}</div>
+        <div class="bubble">${esc(text)}</div>
+        <div class="timestamp">${nowStr()}</div>
       </div>`;
   }
-
   el.appendChild(wrap);
   el.scrollTop = el.scrollHeight;
   return wrap;
@@ -567,11 +456,7 @@ function addLoading() {
   const el = document.getElementById('messages');
   const wrap = document.createElement('div');
   wrap.className = 'msg bot loading';
-  wrap.innerHTML = `
-    <div class="avatar">🤖</div>
-    <div class="bubble-wrap">
-      <div class="bubble">入力中…</div>
-    </div>`;
+  wrap.innerHTML = `<div class="msg-avatar">${BOT_AVATAR_SVG}</div><div class="bubble-wrap"><div class="bubble">入力中…</div></div>`;
   el.appendChild(wrap);
   el.scrollTop = el.scrollHeight;
   return wrap;
@@ -581,95 +466,50 @@ async function sendMessage() {
   const input = document.getElementById('msgInput');
   const text = input.value.trim();
   if (!text) return;
-
   const sendBtn = document.getElementById('sendBtn');
   input.value = ''; autoResize(input);
   sendBtn.disabled = true;
-
   addMessage('user', text);
   const loading = addLoading();
-
   try {
     const result = await callClaude(text);
     loading.remove();
     if (result) addMessage('bot', result.text, result.toolsCalled);
   } catch (e) {
     loading.remove();
-    addMessage('bot', `❌ エラー: ${e.message}`);
+    addMessage('bot', `エラー: ${e.message}`);
   }
-
   sendBtn.disabled = false;
   input.focus();
 }
 
-function scrollQuickBtns() {
-  const el = document.getElementById('quickBtns');
-  el.scrollBy({ left: 160, behavior: 'smooth' });
-}
-
-function sendQuick(text) {
-  document.getElementById('msgInput').value = text;
-  sendMessage();
-}
-
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault(); sendMessage();
-  }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
-}
+function sendQuick(text) { document.getElementById('msgInput').value = text; sendMessage(); }
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 96) + 'px'; }
+function scrollQuickBtns() { document.getElementById('quickBtns').scrollBy({ left: 160, behavior: 'smooth' }); }
 
 // ============================================================
 // APIキー管理
 // ============================================================
-function showApiModal() {
-  document.getElementById('apiModal').classList.remove('hidden');
-}
-
+function showApiModal() { document.getElementById('apiModal').classList.remove('hidden'); }
 function saveApiKey() {
   const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key.startsWith('sk-ant-')) {
-    alert('正しいAnthropicのAPIキーを入力してください（sk-ant- で始まるもの）');
-    return;
-  }
+  if (!key.startsWith('sk-ant-')) { alert('正しいAnthropicのAPIキーを入力してください（sk-ant- で始まるもの）'); return; }
   localStorage.setItem('anthropic_api_key', key);
   document.getElementById('apiModal').classList.add('hidden');
   showWelcome();
 }
+function clearApiKey() { if (confirm('APIキーをリセットしますか？')) { localStorage.removeItem('anthropic_api_key'); showApiModal(); } }
 
-function clearApiKey() {
-  if (confirm('APIキーをリセットしますか？')) {
-    localStorage.removeItem('anthropic_api_key');
-    showApiModal();
-  }
-}
-
-// ============================================================
-// 起動
-// ============================================================
 function showWelcome() {
-  addMessage('bot',
-    `こんにちは！GBPコンシェルジュです😊\n` +
-    `店舗「焼肉 大将」のGBP管理をサポートします。\n\n` +
-    `口コミ返信・投稿作成・データ確認など、何でもお気軽にどうぞ！\n\n` +
-    `💡 下のボタンからよく使う機能をすぐに試せます。`
-  );
+  addMessage('bot', 'こんにちは！MEOコンシェルジュです😊\n店舗「焼肉 大将」のGBP管理をサポートします。\n\n口コミ返信・投稿作成・データ確認など、何でもお気軽にどうぞ！\n\n💡 下のボタンからよく使う機能をすぐに試せます。');
 }
 
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('quickBtns').addEventListener('wheel', e => {
     if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; }
   }, { passive: false });
-  const key = localStorage.getItem('anthropic_api_key');
-  if (key) {
-    showWelcome();
-  } else {
-    showApiModal();
-  }
+  localStorage.getItem('anthropic_api_key') ? showWelcome() : showApiModal();
 });
 </script>
 </body>
