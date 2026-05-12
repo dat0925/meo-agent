@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MEOコンシェルジュ — デモ</title>
 <style>
 :root {
@@ -286,6 +286,7 @@ body {
 
   <!-- クイックボタン -->
   <div class="quick-btns-wrap">
+    <button class="scroll-arrow" id="arrowLeft" onclick="scrollQuickBtns(-1)" style="margin-left:8px;margin-right:0;">‹</button>
     <div class="quick-btns" id="quickBtns">
       <button class="quick-btn" onclick="sendQuick('未返信の口コミを見せて')">📬 未返信口コミ</button>
       <button class="quick-btn" onclick="sendQuick('最近の投稿状況は？')">📝 投稿状況</button>
@@ -294,7 +295,7 @@ body {
       <button class="quick-btn" onclick="sendQuick('写真の状況は？')">📸 写真確認</button>
       <button class="quick-btn" onclick="sendQuick('苦情口コミへの返信文を作って')">⚠️ 苦情対応</button>
     </div>
-    <button class="scroll-arrow" onclick="scrollQuickBtns()">›</button>
+    <button class="scroll-arrow" id="arrowRight" onclick="scrollQuickBtns(1)" style="margin-right:8px;">›</button>
   </div>
 
   <!-- 入力 -->
@@ -486,7 +487,7 @@ async function sendMessage() {
 function sendQuick(text) { document.getElementById('msgInput').value = text; sendMessage(); }
 function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 96) + 'px'; }
-function scrollQuickBtns() { document.getElementById('quickBtns').scrollBy({ left: 160, behavior: 'smooth' }); }
+function scrollQuickBtns(dir) { document.getElementById('quickBtns').scrollBy({ left: 160 * dir, behavior: 'smooth' }); }
 
 // ============================================================
 // APIキー管理
