@@ -234,6 +234,14 @@ body {
 .quick-btn:active { transform: translateY(0); }
 .quick-btn-icon { font-size: 22px; line-height: 1; }
 .quick-btn-label { font-size: 10.5px; color: var(--text-mid); font-weight: 600; text-align: center; line-height: 1.3; white-space: nowrap; }
+.quick-btn-icon-wrap { position: relative; display: inline-flex; }
+.quick-btn-badge {
+  position: absolute; top: -5px; right: -8px;
+  background: #ef4444; color: white;
+  font-size: 9px; font-weight: 800; line-height: 1;
+  padding: 2px 5px; border-radius: 100px;
+  min-width: 16px; text-align: center;
+}
 
 /* ---- 入力エリア ---- */
 .input-area {
@@ -316,7 +324,7 @@ body {
   <div class="quick-btns-wrap">
     <div class="quick-btns-label">よく使う機能</div>
     <div class="quick-btns" id="quickBtns">
-      <button class="quick-btn" onclick="sendQuick('未返信の口コミを見せて')"><span class="quick-btn-icon">📬</span><span class="quick-btn-label">未返信<br>口コミ</span></button>
+      <button class="quick-btn" onclick="sendQuick('未返信の口コミを見せて')"><span class="quick-btn-icon-wrap"><span class="quick-btn-icon">📬</span><span class="quick-btn-badge" id="reviewBadge" style="display:none"></span></span><span class="quick-btn-label">未返信<br>口コミ</span></button>
       <button class="quick-btn" onclick="sendQuick('最近の投稿状況は？')"><span class="quick-btn-icon">📝</span><span class="quick-btn-label">投稿<br>状況</span></button>
       <button class="quick-btn" onclick="sendQuick('先月のアクセスデータを教えて')"><span class="quick-btn-icon">📊</span><span class="quick-btn-label">データ<br>確認</span></button>
       <button class="quick-btn" onclick="sendQuick('投稿案を3つ作って')"><span class="quick-btn-icon">✍️</span><span class="quick-btn-label">投稿案<br>作成</span></button>
@@ -396,7 +404,7 @@ const TOOLS = [
 function executeTool(name, input) {
   if (name === 'get_gbp_stats') return { period: '直近30日', search_impressions: 1240, map_impressions: 830, website_clicks: 95, direction_requests: 42, phone_calls: 18, photo_views: 3200 };
   if (name === 'get_unanswered_reviews') return reviews.filter(r => !r.replied).map(r => ({ review_id: r.id, reviewer: r.reviewer, stars: r.stars, comment: r.comment }));
-  if (name === 'reply_to_review') { const r = reviews.find(r => r.id === input.review_id); if (r) { r.replied = true; r.reply_text = input.reply_text; } return { success: true, message: '返信を投稿しました（モック）' }; }
+  if (name === 'reply_to_review') { const r = reviews.find(r => r.id === input.review_id); if (r) { r.replied = true; r.reply_text = input.reply_text; } updateReviewBadge(); return { success: true, message: '返信を投稿しました（モック）' }; }
   if (name === 'create_gbp_post') { const p = { id: 'post-' + String(posts.length+1).padStart(3,'0'), text: input.text, date: new Date().toISOString().slice(0,10), status: 'published' }; posts.push(p); return { success: true, post_id: p.id, message: '投稿を公開しました（モック）' }; }
   if (name === 'get_posts_history') { const sorted = [...posts].sort((a,b) => b.date.localeCompare(a.date)); const last = sorted[0]?.date; const days = last ? Math.floor((Date.now()-new Date(last))/86400000) : null; return { posts: sorted.slice(0, input.limit||10), last_post_at: last, days_since_last_post: days }; }
   if (name === 'generate_post_draft') { const theme = input.theme||'お店の魅力'; const count = input.count||3; return { drafts: ['【'+theme+'】焼肉 大将では、黒毛和牛をリーズナブルにご提供しています🐄 ご家族・ご友人との特別なひとときに、ぜひお越しください！', '🔥 '+theme+'キャンペーン開催中！期間限定でドリンク1杯無料サービス中。詳しくはお店にお問い合わせください。', '✨ '+theme+'にぴったりのコースをご用意しました。ご予約はお電話またはWeb予約で承ります。', '🌟 当店自慢の熟成肉とともに、素敵なひとときをお過ごしください！'].slice(0, count) }; }
@@ -641,11 +649,19 @@ function handlePhotoSelected(event) {
   reader.readAsDataURL(file);
 }
 
+function updateReviewBadge() {
+  const count = reviews.filter(r => !r.replied).length;
+  const badge = document.getElementById('reviewBadge');
+  if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+  else { badge.style.display = 'none'; }
+}
+
 function showWelcome() {
   addMessage('bot', 'こんにちは！MEOコンシェルジュです😊\n店舗「焼肉 大将」のGBP管理をサポートします。\n\n口コミ返信・投稿作成・データ確認など、何でもお気軽にどうぞ！\n\n📸 写真を送るとGBPの写真フォルダに追加できます。\n✏️ 住所・営業時間などの店舗情報変更もここで完結します。\n\n💡 下のボタンからよく使う機能をすぐに試せます。');
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+  updateReviewBadge();
   showWelcome();
 });
 </script>
