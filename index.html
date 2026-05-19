@@ -238,28 +238,6 @@ body {
 </head>
 <body>
 
-<!-- APIキー入力モーダル -->
-<div class="modal-overlay" id="apiModal">
-  <div class="modal">
-    <div class="modal-icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#1a7a4a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-      </svg>
-    </div>
-    <h2>APIキーを入力してください</h2>
-    <p>このデモはブラウザから直接 Claude API を呼び出します。入力したキーはブラウザにのみ保存され、外部には送信されません。</p>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
-    <button class="modal-btn" onclick="saveApiKey()">デモを開始する</button>
-    <p class="modal-note"><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> でAPIキーを取得できます</p>
-    <div class="modal-service-link">
-      <a href="https://agt-lp.taskra.jp/" target="_blank" title="サービスサイトを見る">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        サービスサイト
-      </a>
-    </div>
-  </div>
-</div>
-
 <!-- チャット画面 -->
 <div class="container">
 
@@ -291,12 +269,6 @@ body {
           <circle cx="12" cy="12" r="10"/><path d="M12 8l4 4-4 4M8 12h8"/>
         </svg>
       </a>
-      <button class="header-icon-btn" onclick="clearApiKey()" title="APIキーを変更">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
-        </svg>
-      </button>
     </div>
   </div>
 
@@ -450,10 +422,9 @@ let conversationHistory = [];
 let pendingPhotoBase64 = null;
 let pendingPhotoMime = null;
 
-async function callClaude(userMessage, imageBase64, imageMime) {
-  const apiKey = localStorage.getItem('anthropic_api_key');
-  if (!apiKey) { showApiModal(); return null; }
+const CLAUDE_PROXY_URL = 'https://sfhtvtcmgueystyuhzvd.supabase.co/functions/v1/claude-proxy';
 
+async function callClaude(userMessage, imageBase64, imageMime) {
   let userContent;
   if (imageBase64) {
     userContent = [
@@ -469,14 +440,13 @@ async function callClaude(userMessage, imageBase64, imageMime) {
   let messages = [...conversationHistory];
 
   for (let round = 0; round < 6; round++) {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch(CLAUDE_PROXY_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024, system: SYSTEM_PROMPT, tools: TOOLS, messages }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      if (res.status === 401) { localStorage.removeItem('anthropic_api_key'); showApiModal(); throw new Error('APIキーが無効です。再入力してください。'); }
       throw new Error(err.error?.message || 'API Error ' + res.status);
     }
     const data = await res.json();
@@ -588,16 +558,6 @@ function handlePhotoSelected(event) {
   reader.readAsDataURL(file);
 }
 
-function showApiModal() { document.getElementById('apiModal').classList.remove('hidden'); }
-function saveApiKey() {
-  const key = document.getElementById('apiKeyInput').value.trim();
-  if (!key.startsWith('sk-ant-')) { alert('正しいAnthropicのAPIキーを入力してください（sk-ant- で始まるもの）'); return; }
-  localStorage.setItem('anthropic_api_key', key);
-  document.getElementById('apiModal').classList.add('hidden');
-  showWelcome();
-}
-function clearApiKey() { if (confirm('APIキーをリセットしますか？')) { localStorage.removeItem('anthropic_api_key'); showApiModal(); } }
-
 function showWelcome() {
   addMessage('bot', 'こんにちは！MEOコンシェルジュです😊\n店舗「焼肉 大将」のGBP管理をサポートします。\n\n口コミ返信・投稿作成・データ確認など、何でもお気軽にどうぞ！\n\n📸 写真を送るとGBPの写真フォルダに追加できます。\n✏️ 住所・営業時間などの店舗情報変更もここで完結します。\n\n💡 下のボタンからよく使う機能をすぐに試せます。');
 }
@@ -606,7 +566,7 @@ window.addEventListener('DOMContentLoaded', function() {
   document.getElementById('quickBtns').addEventListener('wheel', function(e) {
     if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; }
   }, { passive: false });
-  localStorage.getItem('anthropic_api_key') ? showWelcome() : showApiModal();
+  showWelcome();
 });
 </script>
 </body>
