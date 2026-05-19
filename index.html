@@ -657,8 +657,23 @@ function addMessage(role, text, toolsCalled, imageDataUrl) {
   const el = document.getElementById('messages');
   const wrap = document.createElement('div');
   wrap.className = 'msg ' + role;
+  const TOOL_LABELS = {
+    get_gbp_stats: '📊 データ取得',
+    get_unanswered_reviews: '📬 口コミ取得',
+    reply_to_review: '✍️ 口コミ返信',
+    create_gbp_post: '📝 投稿公開',
+    get_posts_history: '📋 投稿履歴取得',
+    generate_post_draft: '💡 投稿案作成',
+    generate_review_reply: '💬 返信文生成',
+    upload_photo_to_gbp: '📸 写真アップロード',
+    get_store_info: '🏪 店舗情報取得',
+    update_store_info: '✏️ 店舗情報更新',
+    get_keyword_rankings: '📍 キーワード順位取得',
+    get_monthly_report: '📋 月次レポート生成',
+    generate_ai_image: '🎨 AI画像生成',
+  };
   const chipsHtml = (toolsCalled && toolsCalled.length)
-    ? '<div class="tool-chips">' + toolsCalled.map(t => '<span class="tool-chip">' + t + '</span>').join('') + '</div>' : '';
+    ? '<div class="tool-chips">' + toolsCalled.map(t => '<span class="tool-chip">' + (TOOL_LABELS[t] || t) + '</span>').join('') + '</div>' : '';
   const imgHtml = imageDataUrl ? '<img src="' + imageDataUrl + '" class="photo-preview" alt="送信した写真">' : '';
   if (role === 'bot') {
     wrap.innerHTML = '<div class="msg-avatar">' + BOT_AVATAR_SVG + '</div><div class="bubble-wrap"><div class="bubble">' + esc(text) + '</div>' + chipsHtml + '<div class="timestamp">' + nowStr() + '</div></div>';
