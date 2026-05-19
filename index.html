@@ -233,6 +233,15 @@ body {
 .quick-btn:hover { border-color: var(--green); background: var(--green-light); transform: translateY(-1px); }
 .quick-btn:active { transform: translateY(0); }
 .quick-btn-icon { font-size: 22px; line-height: 1; }
+.ai-image-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.ai-image-action-btn {
+  flex: 1; min-width: 120px; padding: 9px 10px;
+  border-radius: 10px; font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: inherit; border: 1.5px solid var(--border);
+  background: white; color: var(--text); transition: all .15s;
+}
+.ai-image-action-btn:hover { border-color: var(--green); background: var(--green-light); }
+.ai-image-action-btn:disabled { opacity: .5; cursor: default; }
 .quick-btn-label { font-size: 10.5px; color: var(--text-mid); font-weight: 600; text-align: center; line-height: 1.3; white-space: nowrap; }
 .quick-btn-icon-wrap { position: relative; display: inline-flex; }
 .quick-btn-badge {
@@ -579,7 +588,8 @@ async function callClaude(userMessage, imageBase64, imageMime) {
           const imgEl = document.getElementById('messages');
           const wrap = document.createElement('div');
           wrap.className = 'msg bot';
-          wrap.innerHTML = `<div class="msg-avatar">${BOT_AVATAR_SVG}</div><div class="bubble-wrap"><div class="bubble" style="padding:6px;"><img src="data:image/webp;base64,${lastGeneratedImageB64}" style="max-width:100%;border-radius:10px;display:block;"></div><div class="timestamp">${nowStr()}</div></div>`;
+          const imgId = 'ai-img-actions-' + Date.now();
+          wrap.innerHTML = `<div class="msg-avatar">${BOT_AVATAR_SVG}</div><div class="bubble-wrap"><div class="bubble" style="padding:8px;"><img src="data:image/webp;base64,${lastGeneratedImageB64}" style="max-width:100%;border-radius:10px;display:block;margin-bottom:8px;"><div class="ai-image-actions" id="${imgId}"><button class="ai-image-action-btn" onclick="useGeneratedImage('photo','${imgId}')">📸 写真としてアップ</button><button class="ai-image-action-btn" onclick="useGeneratedImage('post','${imgId}')">📝 投稿として公開</button></div></div><div class="timestamp">${nowStr()}</div></div>`;
           imgEl.appendChild(wrap);
           imgEl.scrollTop = imgEl.scrollHeight;
           lastGeneratedImageB64 = null;
@@ -678,6 +688,25 @@ function handlePhotoSelected(event) {
     sendMessage();
   };
   reader.readAsDataURL(file);
+}
+
+async function useGeneratedImage(mode, actionsId) {
+  const actionsEl = document.getElementById(actionsId);
+  if (!actionsEl) return;
+  actionsEl.querySelectorAll('button').forEach(b => b.disabled = true);
+
+  const block = mode === 'photo'
+    ? { name: 'upload_photo_to_gbp', input: { category: 'FOOD', caption: 'AI生成画像' } }
+    : { name: 'create_gbp_post', input: { text: 'AI生成画像を使った投稿です。' } };
+
+  showApprovalCard(block);
+  const approved = await new Promise(r => { pendingApprovalResolve = r; });
+  actionsEl.remove();
+
+  if (!approved) return;
+
+  const result = await executeTool(block.name, block.input);
+  addMessage('bot', result.success ? '✅ ' + result.message : '❌ エラー: ' + (result.error || '不明なエラー'));
 }
 
 function updateReviewBadge() {
