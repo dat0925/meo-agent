@@ -589,7 +589,7 @@ async function callClaude(userMessage, imageBase64, imageMime) {
           const wrap = document.createElement('div');
           wrap.className = 'msg bot';
           const imgId = 'ai-img-actions-' + Date.now();
-          wrap.innerHTML = `<div class="msg-avatar">${BOT_AVATAR_SVG}</div><div class="bubble-wrap"><div class="bubble" style="padding:8px;"><img src="data:image/webp;base64,${lastGeneratedImageB64}" style="max-width:100%;border-radius:10px;display:block;margin-bottom:8px;"><div class="ai-image-actions" id="${imgId}"><button class="ai-image-action-btn" onclick="useGeneratedImage('photo','${imgId}')">📸 写真としてアップ</button><button class="ai-image-action-btn" onclick="useGeneratedImage('post','${imgId}')">📝 投稿として公開</button><button class="ai-image-action-btn" onclick="useGeneratedImage('both','${imgId}')" style="flex-basis:100%;">📸📝 写真アップ＋投稿として公開</button></div></div><div class="timestamp">${nowStr()}</div></div>`;
+          wrap.innerHTML = `<div class="msg-avatar">${BOT_AVATAR_SVG}</div><div class="bubble-wrap"><div class="bubble" style="padding:8px;"><img src="data:image/webp;base64,${lastGeneratedImageB64}" style="max-width:100%;border-radius:10px;display:block;margin-bottom:8px;"><div class="ai-image-actions" id="${imgId}"><button class="ai-image-action-btn" onclick="useGeneratedImage('photo','${imgId}')">📸 写真としてアップ</button><button class="ai-image-action-btn" onclick="useGeneratedImage('post','${imgId}')">📝 投稿として公開</button></div></div><div class="timestamp">${nowStr()}</div></div>`;
           imgEl.appendChild(wrap);
           imgEl.scrollTop = imgEl.scrollHeight;
           lastGeneratedImageB64 = null;
