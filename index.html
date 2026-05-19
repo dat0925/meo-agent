@@ -589,7 +589,7 @@ async function callClaude(userMessage, imageBase64, imageMime) {
           const wrap = document.createElement('div');
           wrap.className = 'msg bot';
           const imgId = 'ai-img-actions-' + Date.now();
-          wrap.innerHTML = `<div class="msg-avatar">${BOT_AVATAR_SVG}</div><div class="bubble-wrap"><div class="bubble" style="padding:8px;"><img src="data:image/webp;base64,${lastGeneratedImageB64}" style="max-width:100%;border-radius:10px;display:block;margin-bottom:8px;"><div class="ai-image-actions" id="${imgId}"><button class="ai-image-action-btn" onclick="useGeneratedImage('photo','${imgId}')">📸 写真としてアップ</button><button class="ai-image-action-btn" onclick="useGeneratedImage('post','${imgId}')">📝 投稿として公開</button></div></div><div class="timestamp">${nowStr()}</div></div>`;
+          wrap.innerHTML = `<div class="msg-avatar">${BOT_AVATAR_SVG}</div><div class="bubble-wrap"><div class="bubble" style="padding:8px;"><img src="data:image/webp;base64,${lastGeneratedImageB64}" style="max-width:100%;border-radius:10px;display:block;margin-bottom:8px;"><div class="ai-image-actions" id="${imgId}"><button class="ai-image-action-btn" onclick="useGeneratedImage('photo','${imgId}')">📸 写真としてアップ</button><button class="ai-image-action-btn" onclick="useGeneratedImage('post','${imgId}')">📝 投稿として公開</button><button class="ai-image-action-btn" onclick="useGeneratedImage('both','${imgId}')" style="flex-basis:100%;">📸📝 写真アップ＋投稿として公開</button></div></div><div class="timestamp">${nowStr()}</div></div>`;
           imgEl.appendChild(wrap);
           imgEl.scrollTop = imgEl.scrollHeight;
           lastGeneratedImageB64 = null;
@@ -694,19 +694,41 @@ async function useGeneratedImage(mode, actionsId) {
   const actionsEl = document.getElementById(actionsId);
   if (!actionsEl) return;
   actionsEl.querySelectorAll('button').forEach(b => b.disabled = true);
+  actionsEl.innerHTML = '<span style="font-size:12px;color:var(--text-mid)">処理中…</span>';
 
-  const block = mode === 'photo'
-    ? { name: 'upload_photo_to_gbp', input: { category: 'FOOD', caption: 'AI生成画像' } }
-    : { name: 'create_gbp_post', input: { text: 'AI生成画像を使った投稿です。' } };
+  const needsPost = mode === 'post' || mode === 'both';
+  const needsPhoto = mode === 'photo' || mode === 'both';
 
-  showApprovalCard(block);
-  const approved = await new Promise(r => { pendingApprovalResolve = r; });
+  // 投稿案を生成
+  let postText = 'AI生成画像を使った投稿です。';
+  if (needsPost) {
+    const draft = await executeTool('generate_post_draft', { theme: 'AI生成画像', count: 1 });
+    if (draft.drafts?.[0]) postText = draft.drafts[0];
+  }
+
   actionsEl.remove();
 
-  if (!approved) return;
+  // 写真アップロード
+  if (needsPhoto) {
+    const photoBlock = { name: 'upload_photo_to_gbp', input: { category: 'FOOD', caption: 'AI生成画像' } };
+    showApprovalCard(photoBlock);
+    const approved = await new Promise(r => { pendingApprovalResolve = r; });
+    if (approved) {
+      const result = await executeTool('upload_photo_to_gbp', { category: 'FOOD', caption: 'AI生成画像' });
+      addMessage('bot', result.success ? '✅ ' + result.message : '❌ ' + (result.error || 'エラー'));
+    }
+  }
 
-  const result = await executeTool(block.name, block.input);
-  addMessage('bot', result.success ? '✅ ' + result.message : '❌ エラー: ' + (result.error || '不明なエラー'));
+  // 投稿公開
+  if (needsPost) {
+    const postBlock = { name: 'create_gbp_post', input: { text: postText } };
+    showApprovalCard(postBlock);
+    const approved = await new Promise(r => { pendingApprovalResolve = r; });
+    if (approved) {
+      const result = await executeTool('create_gbp_post', { text: postText });
+      addMessage('bot', result.success ? '✅ ' + result.message : '❌ ' + (result.error || 'エラー'));
+    }
+  }
 }
 
 function updateReviewBadge() {
