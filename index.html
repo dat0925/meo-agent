@@ -552,6 +552,103 @@ body {
       </svg>
     </button>
   </div>
+
+  <!-- 基本設定パネル -->
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <button class="settings-back-btn" onclick="closeSettings()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="settings-title">⚙️ 基本設定</div>
+    </div>
+    <div class="settings-body">
+      <div class="settings-section">
+        <div class="settings-section-title">店舗情報</div>
+        <div class="settings-row"><label>店舗名</label><input class="settings-input" id="sStoreName" placeholder="例：焼肉 大将"></div>
+        <div class="settings-row"><label>店舗ID</label><input class="settings-input" id="sStoreId" placeholder="GBP ロケーションID"></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">計測キーワード</div>
+        <div class="keyword-list" id="keywordList"></div>
+        <div class="add-kw-row">
+          <input id="newKeyword" placeholder="キーワードを追加" onkeydown="if(event.key==='Enter')addKeyword()">
+          <button class="add-kw-btn" onclick="addKeyword()">追加</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">計測地点</div>
+        <div id="locationList"></div>
+        <div class="add-location-row">
+          <button class="add-location-btn" onclick="addLocation()">＋ 計測地点を追加</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-save-row">
+      <button class="settings-save-btn" onclick="saveSettings()">設定を保存</button>
+    </div>
+  </div>
+
+  <!-- 写真ソース選択シート -->
+  <div class="sheet-overlay" id="photoSourceSheet" onclick="closePhotoSheet(event)">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">写真を追加</div>
+      <button class="sheet-option" onclick="closePhotoSheetAndDo('ai')">
+        <span class="sheet-option-icon">🎨</span>
+        <span class="sheet-option-text"><span class="sheet-option-label">AIで画像を生成する</span><span class="sheet-option-desc">最新AI（Image Generation）で店舗用画像を自動作成</span></span>
+      </button>
+      <button class="sheet-option" onclick="closePhotoSheetAndDo('library')">
+        <span class="sheet-option-icon">📁</span>
+        <span class="sheet-option-text"><span class="sheet-option-label">デバイスから選択</span><span class="sheet-option-desc">ライブラリの写真をアップロード</span></span>
+      </button>
+      <button class="sheet-option" onclick="closePhotoSheetAndDo('camera')">
+        <span class="sheet-option-icon">📷</span>
+        <span class="sheet-option-text"><span class="sheet-option-label">写真を撮る</span><span class="sheet-option-desc">カメラで今すぐ撮影</span></span>
+      </button>
+      <button class="sheet-cancel" onclick="closePhotoSheet()">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- 投稿案タイプ選択シート -->
+  <div class="sheet-overlay" id="postTypeSheet" onclick="closePostSheet(event)">
+    <div class="bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">投稿案を作成</div>
+      <button class="sheet-option" onclick="closePostSheetAndDo('text')">
+        <span class="sheet-option-icon">📝</span>
+        <span class="sheet-option-text"><span class="sheet-option-label">テキスト作成</span><span class="sheet-option-desc">投稿文のみを3案作成します</span></span>
+      </button>
+      <button class="sheet-option" onclick="closePostSheetAndDo('image')">
+        <span class="sheet-option-icon">🖼️</span>
+        <span class="sheet-option-text"><span class="sheet-option-label">テキスト＋画像作成</span><span class="sheet-option-desc">AI画像も一緒に生成します</span></span>
+      </button>
+      <button class="sheet-cancel" onclick="closePostSheet()">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- 苦情対応モーダル -->
+  <div class="complaint-overlay" id="complaintOverlay" onclick="closeComplaintModal(event)">
+    <div class="complaint-modal">
+      <h3>⚠️ 苦情対応</h3>
+      <p class="complaint-sub">口コミの内容を貼り付けて、対応スタイルを選んでください</p>
+      <textarea class="complaint-textarea" id="complaintText" placeholder="口コミの内容をここに貼り付けてください…" rows="4"></textarea>
+      <div class="complaint-style-label">対応スタイル（複数選択可）</div>
+      <div class="style-chips">
+        <button class="style-chip" onclick="toggleStyle(this)">穏便に</button>
+        <button class="style-chip" onclick="toggleStyle(this)">毅然と</button>
+        <button class="style-chip" onclick="toggleStyle(this)">丁寧に</button>
+        <button class="style-chip" onclick="toggleStyle(this)">共感を示して</button>
+        <button class="style-chip" onclick="toggleStyle(this)">簡潔に</button>
+        <button class="style-chip" onclick="toggleStyle(this)">誠意を込めて</button>
+      </div>
+      <button class="complaint-submit" onclick="submitComplaint()">返信文を作成する</button>
+      <button class="complaint-cancel-btn" onclick="closeComplaintModal()">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- ファイル入力（非表示） -->
+  <input type="file" id="cameraFileInput" accept="image/*" capture="camera" onchange="handlePhotoSelected(event)" style="display:none">
+
 </div>
 
 <!-- スマホ試用QRカード -->
@@ -566,101 +663,6 @@ body {
   <div class="qr-card-url">dat0925.github.io/meo-agent/</div>
 </div>
 
-<!-- 基本設定パネル -->
-<div class="settings-panel" id="settingsPanel">
-  <div class="settings-header">
-    <button class="settings-back-btn" onclick="closeSettings()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <div class="settings-title">⚙️ 基本設定</div>
-  </div>
-  <div class="settings-body">
-    <div class="settings-section">
-      <div class="settings-section-title">店舗情報</div>
-      <div class="settings-row"><label>店舗名</label><input class="settings-input" id="sStoreName" placeholder="例：焼肉 大将"></div>
-      <div class="settings-row"><label>店舗ID</label><input class="settings-input" id="sStoreId" placeholder="GBP ロケーションID"></div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-section-title">計測キーワード</div>
-      <div class="keyword-list" id="keywordList"></div>
-      <div class="add-kw-row">
-        <input id="newKeyword" placeholder="キーワードを追加" onkeydown="if(event.key==='Enter')addKeyword()">
-        <button class="add-kw-btn" onclick="addKeyword()">追加</button>
-      </div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-section-title">計測地点</div>
-      <div id="locationList"></div>
-      <div class="add-location-row">
-        <button class="add-location-btn" onclick="addLocation()">＋ 計測地点を追加</button>
-      </div>
-    </div>
-  </div>
-  <div class="settings-save-row">
-    <button class="settings-save-btn" onclick="saveSettings()">設定を保存</button>
-  </div>
-</div>
-
-<!-- 写真ソース選択シート -->
-<div class="sheet-overlay" id="photoSourceSheet" onclick="closePhotoSheet(event)">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">写真を追加</div>
-    <button class="sheet-option" onclick="closePhotoSheetAndDo('ai')">
-      <span class="sheet-option-icon">🎨</span>
-      <span class="sheet-option-text"><span class="sheet-option-label">AIで画像を生成する</span><span class="sheet-option-desc">gpt-image-1 で店舗用画像を自動作成</span></span>
-    </button>
-    <button class="sheet-option" onclick="closePhotoSheetAndDo('library')">
-      <span class="sheet-option-icon">📁</span>
-      <span class="sheet-option-text"><span class="sheet-option-label">デバイスから選択</span><span class="sheet-option-desc">ライブラリの写真をアップロード</span></span>
-    </button>
-    <button class="sheet-option" onclick="closePhotoSheetAndDo('camera')">
-      <span class="sheet-option-icon">📷</span>
-      <span class="sheet-option-text"><span class="sheet-option-label">写真を撮る</span><span class="sheet-option-desc">カメラで今すぐ撮影</span></span>
-    </button>
-    <button class="sheet-cancel" onclick="closePhotoSheet()">キャンセル</button>
-  </div>
-</div>
-
-<!-- 投稿案タイプ選択シート -->
-<div class="sheet-overlay" id="postTypeSheet" onclick="closePostSheet(event)">
-  <div class="bottom-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">投稿案を作成</div>
-    <button class="sheet-option" onclick="closePostSheetAndDo('text')">
-      <span class="sheet-option-icon">📝</span>
-      <span class="sheet-option-text"><span class="sheet-option-label">テキスト作成</span><span class="sheet-option-desc">投稿文のみを3案作成します</span></span>
-    </button>
-    <button class="sheet-option" onclick="closePostSheetAndDo('image')">
-      <span class="sheet-option-icon">🖼️</span>
-      <span class="sheet-option-text"><span class="sheet-option-label">テキスト＋画像作成</span><span class="sheet-option-desc">AI画像も一緒に生成します</span></span>
-    </button>
-    <button class="sheet-cancel" onclick="closePostSheet()">キャンセル</button>
-  </div>
-</div>
-
-<!-- 苦情対応モーダル -->
-<div class="complaint-overlay" id="complaintOverlay" onclick="closeComplaintModal(event)">
-  <div class="complaint-modal">
-    <h3>⚠️ 苦情対応</h3>
-    <p class="complaint-sub">口コミの内容を貼り付けて、対応スタイルを選んでください</p>
-    <textarea class="complaint-textarea" id="complaintText" placeholder="口コミの内容をここに貼り付けてください…" rows="4"></textarea>
-    <div class="complaint-style-label">対応スタイル（複数選択可）</div>
-    <div class="style-chips">
-      <button class="style-chip" onclick="toggleStyle(this)">穏便に</button>
-      <button class="style-chip" onclick="toggleStyle(this)">毅然と</button>
-      <button class="style-chip" onclick="toggleStyle(this)">丁寧に</button>
-      <button class="style-chip" onclick="toggleStyle(this)">共感を示して</button>
-      <button class="style-chip" onclick="toggleStyle(this)">簡潔に</button>
-      <button class="style-chip" onclick="toggleStyle(this)">誠意を込めて</button>
-    </div>
-    <button class="complaint-submit" onclick="submitComplaint()">返信文を作成する</button>
-    <button class="complaint-cancel-btn" onclick="closeComplaintModal()">キャンセル</button>
-  </div>
-</div>
-
-<!-- ファイル入力（非表示） -->
-<input type="file" id="cameraFileInput" accept="image/*" capture="camera" onchange="handlePhotoSelected(event)" style="display:none">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
