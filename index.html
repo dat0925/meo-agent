@@ -307,6 +307,173 @@ body {
   font-size: 9px; color: var(--text-mid); margin-top: 8px;
   word-break: break-all; max-width: 120px;
 }
+
+/* ---- 基本設定パネル ---- */
+.container { position: relative; }
+.settings-panel {
+  position: absolute; inset: 0; z-index: 100;
+  background: #f2f4f6;
+  display: flex; flex-direction: column;
+  transform: translateX(100%);
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+}
+.settings-panel.open { transform: translateX(0); }
+.settings-header {
+  background: white; border-bottom: 1px solid var(--border);
+  padding: 12px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.settings-back-btn {
+  width: 34px; height: 34px; border: none; background: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--green); border-radius: 8px;
+}
+.settings-back-btn:hover { background: var(--green-light); }
+.settings-back-btn svg { width: 20px; height: 20px; }
+.settings-title { font-size: 15px; font-weight: 800; color: var(--text); }
+.settings-body { flex: 1; overflow-y: auto; padding: 16px 14px; }
+.settings-section {
+  background: white; border-radius: 16px; margin-bottom: 16px;
+  overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.settings-section-title {
+  font-size: 11px; font-weight: 700; color: var(--text-mid);
+  letter-spacing: .06em; padding: 14px 16px 8px; text-transform: uppercase;
+}
+.settings-row {
+  padding: 10px 16px; border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.settings-row:first-of-type { border-top: none; }
+.settings-row label { font-size: 13px; color: var(--text); font-weight: 600; min-width: 80px; }
+.settings-input {
+  flex: 1; padding: 8px 12px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 13px; font-family: inherit;
+  color: var(--text); outline: none; transition: border-color .15s;
+}
+.settings-input:focus { border-color: var(--green); }
+.keyword-list { padding: 10px 16px 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+.keyword-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--green-light); color: var(--green);
+  border: 1px solid rgba(26,122,74,.25); border-radius: 100px;
+  padding: 4px 10px; font-size: 12px; font-weight: 600;
+}
+.keyword-tag button {
+  background: none; border: none; cursor: pointer; color: var(--green);
+  font-size: 14px; line-height: 1; padding: 0; display: flex; align-items: center;
+}
+.add-kw-row { padding: 8px 16px 14px; display: flex; gap: 8px; }
+.add-kw-row input {
+  flex: 1; padding: 8px 12px; border: 1.5px solid var(--border);
+  border-radius: 10px; font-size: 13px; font-family: inherit;
+  color: var(--text); outline: none; transition: border-color .15s;
+}
+.add-kw-row input:focus { border-color: var(--green); }
+.add-kw-btn {
+  padding: 8px 14px; background: var(--green); color: white;
+  border: none; border-radius: 10px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit; white-space: nowrap;
+}
+.location-entry {
+  border-top: 1px solid var(--border); padding: 12px 16px;
+  display: flex; gap: 8px; align-items: flex-start;
+}
+.location-entry:first-of-type { border-top: none; }
+.location-fields { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+.location-remove {
+  background: none; border: none; cursor: pointer; color: #ef4444;
+  font-size: 18px; padding: 2px; line-height: 1; align-self: center;
+}
+.add-location-row { padding: 8px 16px 14px; }
+.add-location-btn {
+  width: 100%; padding: 10px; background: var(--green-light); color: var(--green);
+  border: 1.5px dashed rgba(26,122,74,.4); border-radius: 10px;
+  font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.settings-save-row { padding: 0 14px 16px; }
+.settings-save-btn {
+  width: 100%; padding: 13px; background: var(--green); color: white;
+  border: none; border-radius: 12px; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.settings-save-btn:hover { opacity: .88; }
+
+/* ---- ボトムシート ---- */
+.sheet-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.4);
+  z-index: 80; display: none;
+}
+.sheet-overlay.open { display: block; }
+.bottom-sheet {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: white; border-radius: 20px 20px 0 0;
+  padding: 12px 14px 28px; z-index: 81;
+  transform: translateY(100%);
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+.sheet-overlay.open .bottom-sheet { transform: translateY(0); }
+.sheet-handle {
+  width: 36px; height: 4px; background: var(--border);
+  border-radius: 2px; margin: 0 auto 14px;
+}
+.sheet-title { font-size: 13px; font-weight: 700; color: var(--text-mid); margin-bottom: 10px; text-align: center; }
+.sheet-option {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 14px; border-radius: 12px; cursor: pointer;
+  border: none; background: none; font-family: inherit; width: 100%;
+  transition: background .15s; text-align: left; margin-bottom: 4px;
+}
+.sheet-option:hover { background: var(--green-light); }
+.sheet-option-icon { font-size: 22px; width: 36px; text-align: center; flex-shrink: 0; }
+.sheet-option-text { display: flex; flex-direction: column; gap: 2px; }
+.sheet-option-label { font-size: 14px; font-weight: 700; color: var(--text); }
+.sheet-option-desc { font-size: 11px; color: var(--text-mid); }
+.sheet-cancel {
+  width: 100%; padding: 12px; background: #f2f4f6; color: var(--text-mid);
+  border: none; border-radius: 12px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: inherit; margin-top: 6px;
+}
+
+/* ---- 苦情対応モーダル ---- */
+.complaint-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.5);
+  z-index: 90; display: none; align-items: flex-end;
+}
+.complaint-overlay.open { display: flex; }
+.complaint-modal {
+  background: white; border-radius: 20px 20px 0 0;
+  padding: 20px 16px 28px; width: 100%;
+  max-height: 85%;
+  display: flex; flex-direction: column;
+}
+.complaint-modal h3 { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.complaint-modal .complaint-sub { font-size: 12px; color: var(--text-mid); margin-bottom: 14px; }
+.complaint-textarea {
+  width: 100%; padding: 11px 13px; border: 1.5px solid var(--border);
+  border-radius: 12px; font-size: 13px; font-family: inherit; color: var(--text);
+  resize: none; outline: none; min-height: 100px; transition: border-color .15s;
+  margin-bottom: 14px;
+}
+.complaint-textarea:focus { border-color: var(--green); }
+.complaint-style-label { font-size: 12px; font-weight: 700; color: var(--text-mid); margin-bottom: 8px; }
+.style-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 16px; }
+.style-chip {
+  padding: 7px 14px; border-radius: 100px;
+  border: 1.5px solid var(--border); background: white;
+  font-size: 13px; font-weight: 600; color: var(--text-mid);
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.style-chip.selected { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.complaint-submit {
+  width: 100%; padding: 13px; background: var(--green); color: white;
+  border: none; border-radius: 12px; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.complaint-submit:hover { opacity: .88; }
+.complaint-cancel-btn {
+  width: 100%; padding: 10px; background: none; color: var(--text-mid);
+  border: none; font-size: 13px; cursor: pointer; font-family: inherit; margin-top: 6px;
+}
 </style>
 </head>
 <body>
@@ -357,19 +524,19 @@ body {
       <button class="quick-btn" onclick="sendQuick('未返信の口コミを見せて')"><span class="quick-btn-icon-wrap"><span class="quick-btn-icon">📬</span><span class="quick-btn-badge" id="reviewBadge" style="display:none"></span></span><span class="quick-btn-label">未返信<br>口コミ</span></button>
       <button class="quick-btn" onclick="sendQuick('最近の投稿状況は？')"><span class="quick-btn-icon">📝</span><span class="quick-btn-label">投稿<br>状況</span></button>
       <button class="quick-btn" onclick="sendQuick('先月のアクセスデータを教えて')"><span class="quick-btn-icon">📊</span><span class="quick-btn-label">データ<br>確認</span></button>
-      <button class="quick-btn" onclick="sendQuick('投稿案を3つ作って')"><span class="quick-btn-icon">✍️</span><span class="quick-btn-label">投稿案<br>作成</span></button>
-      <button class="quick-btn" onclick="triggerPhotoUpload()"><span class="quick-btn-icon">📸</span><span class="quick-btn-label">写真を<br>送る</span></button>
-      <button class="quick-btn" onclick="sendQuick('苦情口コミへの返信文を作って')"><span class="quick-btn-icon">⚠️</span><span class="quick-btn-label">苦情<br>対応</span></button>
+      <button class="quick-btn" onclick="openPostTypeSheet()"><span class="quick-btn-icon">✍️</span><span class="quick-btn-label">投稿案<br>作成</span></button>
+      <button class="quick-btn" onclick="openPhotoSourceSheet()"><span class="quick-btn-icon">📸</span><span class="quick-btn-label">写真を<br>送る</span></button>
+      <button class="quick-btn" onclick="openComplaintModal()"><span class="quick-btn-icon">⚠️</span><span class="quick-btn-label">苦情<br>対応</span></button>
       <button class="quick-btn" onclick="sendQuick('店舗情報を変更したい')"><span class="quick-btn-icon">✏️</span><span class="quick-btn-label">店舗情報<br>変更</span></button>
       <button class="quick-btn" onclick="sendQuick('キーワード順位を教えて')"><span class="quick-btn-icon">📍</span><span class="quick-btn-label">キーワード<br>順位</span></button>
       <button class="quick-btn" onclick="sendQuick('今月の月次レポートをまとめて')"><span class="quick-btn-icon">📋</span><span class="quick-btn-label">月次<br>レポート</span></button>
-      <button class="quick-btn" onclick="sendQuick('AI画像を生成して投稿したい')"><span class="quick-btn-icon">🎨</span><span class="quick-btn-label">AI画像<br>生成</span></button>
+      <button class="quick-btn" onclick="openSettings()"><span class="quick-btn-icon">⚙️</span><span class="quick-btn-label">基本<br>設定</span></button>
     </div>
   </div>
 
   <!-- 入力 -->
   <div class="input-area">
-    <button class="photo-btn" onclick="triggerPhotoUpload()" title="写真を送る">
+    <button class="photo-btn" onclick="openPhotoSourceSheet()" title="写真を追加">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2"/>
         <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -398,6 +565,102 @@ body {
   <div id="qrcode"></div>
   <div class="qr-card-url">dat0925.github.io/meo-agent/</div>
 </div>
+
+<!-- 基本設定パネル -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-header">
+    <button class="settings-back-btn" onclick="closeSettings()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="settings-title">⚙️ 基本設定</div>
+  </div>
+  <div class="settings-body">
+    <div class="settings-section">
+      <div class="settings-section-title">店舗情報</div>
+      <div class="settings-row"><label>店舗名</label><input class="settings-input" id="sStoreName" placeholder="例：焼肉 大将"></div>
+      <div class="settings-row"><label>店舗ID</label><input class="settings-input" id="sStoreId" placeholder="GBP ロケーションID"></div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">計測キーワード</div>
+      <div class="keyword-list" id="keywordList"></div>
+      <div class="add-kw-row">
+        <input id="newKeyword" placeholder="キーワードを追加" onkeydown="if(event.key==='Enter')addKeyword()">
+        <button class="add-kw-btn" onclick="addKeyword()">追加</button>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">計測地点</div>
+      <div id="locationList"></div>
+      <div class="add-location-row">
+        <button class="add-location-btn" onclick="addLocation()">＋ 計測地点を追加</button>
+      </div>
+    </div>
+  </div>
+  <div class="settings-save-row">
+    <button class="settings-save-btn" onclick="saveSettings()">設定を保存</button>
+  </div>
+</div>
+
+<!-- 写真ソース選択シート -->
+<div class="sheet-overlay" id="photoSourceSheet" onclick="closePhotoSheet(event)">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">写真を追加</div>
+    <button class="sheet-option" onclick="closePhotoSheetAndDo('ai')">
+      <span class="sheet-option-icon">🎨</span>
+      <span class="sheet-option-text"><span class="sheet-option-label">AIで画像を生成する</span><span class="sheet-option-desc">gpt-image-1 で店舗用画像を自動作成</span></span>
+    </button>
+    <button class="sheet-option" onclick="closePhotoSheetAndDo('library')">
+      <span class="sheet-option-icon">📁</span>
+      <span class="sheet-option-text"><span class="sheet-option-label">デバイスから選択</span><span class="sheet-option-desc">ライブラリの写真をアップロード</span></span>
+    </button>
+    <button class="sheet-option" onclick="closePhotoSheetAndDo('camera')">
+      <span class="sheet-option-icon">📷</span>
+      <span class="sheet-option-text"><span class="sheet-option-label">写真を撮る</span><span class="sheet-option-desc">カメラで今すぐ撮影</span></span>
+    </button>
+    <button class="sheet-cancel" onclick="closePhotoSheet()">キャンセル</button>
+  </div>
+</div>
+
+<!-- 投稿案タイプ選択シート -->
+<div class="sheet-overlay" id="postTypeSheet" onclick="closePostSheet(event)">
+  <div class="bottom-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">投稿案を作成</div>
+    <button class="sheet-option" onclick="closePostSheetAndDo('text')">
+      <span class="sheet-option-icon">📝</span>
+      <span class="sheet-option-text"><span class="sheet-option-label">テキスト作成</span><span class="sheet-option-desc">投稿文のみを3案作成します</span></span>
+    </button>
+    <button class="sheet-option" onclick="closePostSheetAndDo('image')">
+      <span class="sheet-option-icon">🖼️</span>
+      <span class="sheet-option-text"><span class="sheet-option-label">テキスト＋画像作成</span><span class="sheet-option-desc">AI画像も一緒に生成します</span></span>
+    </button>
+    <button class="sheet-cancel" onclick="closePostSheet()">キャンセル</button>
+  </div>
+</div>
+
+<!-- 苦情対応モーダル -->
+<div class="complaint-overlay" id="complaintOverlay" onclick="closeComplaintModal(event)">
+  <div class="complaint-modal">
+    <h3>⚠️ 苦情対応</h3>
+    <p class="complaint-sub">口コミの内容を貼り付けて、対応スタイルを選んでください</p>
+    <textarea class="complaint-textarea" id="complaintText" placeholder="口コミの内容をここに貼り付けてください…" rows="4"></textarea>
+    <div class="complaint-style-label">対応スタイル（複数選択可）</div>
+    <div class="style-chips">
+      <button class="style-chip" onclick="toggleStyle(this)">穏便に</button>
+      <button class="style-chip" onclick="toggleStyle(this)">毅然と</button>
+      <button class="style-chip" onclick="toggleStyle(this)">丁寧に</button>
+      <button class="style-chip" onclick="toggleStyle(this)">共感を示して</button>
+      <button class="style-chip" onclick="toggleStyle(this)">簡潔に</button>
+      <button class="style-chip" onclick="toggleStyle(this)">誠意を込めて</button>
+    </div>
+    <button class="complaint-submit" onclick="submitComplaint()">返信文を作成する</button>
+    <button class="complaint-cancel-btn" onclick="closeComplaintModal()">キャンセル</button>
+  </div>
+</div>
+
+<!-- ファイル入力（非表示） -->
+<input type="file" id="cameraFileInput" accept="image/*" capture="camera" onchange="handlePhotoSelected(event)" style="display:none">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
@@ -725,6 +988,118 @@ async function sendMessage() {
   }
   sendBtn.disabled = false;
   input.focus();
+}
+
+// ============================================================
+// 基本設定
+// ============================================================
+let appSettings = JSON.parse(localStorage.getItem('meo_settings') || '{"storeName":"焼肉 大将","storeId":"","keywords":["焼肉 渋谷","焼肉 個室 渋谷","和牛 渋谷"],"locations":[{"name":"渋谷駅前","address":"東京都渋谷区道玄坂1丁目"}]}');
+
+function openSettings() {
+  document.getElementById('sStoreName').value = appSettings.storeName || '';
+  document.getElementById('sStoreId').value = appSettings.storeId || '';
+  renderKeywords();
+  renderLocations();
+  document.getElementById('settingsPanel').classList.add('open');
+}
+function closeSettings() { document.getElementById('settingsPanel').classList.remove('open'); }
+
+function renderKeywords() {
+  const el = document.getElementById('keywordList');
+  el.innerHTML = appSettings.keywords.map((kw, i) =>
+    `<span class="keyword-tag">${esc(kw)}<button onclick="removeKeyword(${i})">×</button></span>`
+  ).join('');
+}
+function addKeyword() {
+  const input = document.getElementById('newKeyword');
+  const kw = input.value.trim();
+  if (!kw) return;
+  appSettings.keywords.push(kw);
+  input.value = '';
+  renderKeywords();
+}
+function removeKeyword(i) { appSettings.keywords.splice(i, 1); renderKeywords(); }
+
+function renderLocations() {
+  const el = document.getElementById('locationList');
+  el.innerHTML = appSettings.locations.map((loc, i) => `
+    <div class="location-entry">
+      <div class="location-fields">
+        <input class="settings-input" placeholder="地点名（例：渋谷駅前）" value="${esc(loc.name)}" oninput="appSettings.locations[${i}].name=this.value">
+        <input class="settings-input" placeholder="住所・エリア" value="${esc(loc.address)}" oninput="appSettings.locations[${i}].address=this.value">
+      </div>
+      <button class="location-remove" onclick="removeLocation(${i})">×</button>
+    </div>`).join('');
+}
+function addLocation() { appSettings.locations.push({ name: '', address: '' }); renderLocations(); }
+function removeLocation(i) { appSettings.locations.splice(i, 1); renderLocations(); }
+
+function saveSettings() {
+  appSettings.storeName = document.getElementById('sStoreName').value.trim();
+  appSettings.storeId = document.getElementById('sStoreId').value.trim();
+  localStorage.setItem('meo_settings', JSON.stringify(appSettings));
+  closeSettings();
+  addMessage('bot', `✅ 設定を保存しました！\n\nキーワード：${appSettings.keywords.join('、')}\n計測地点：${appSettings.locations.map(l=>l.name).join('、')}`);
+}
+
+// ============================================================
+// 写真ソース選択
+// ============================================================
+function openPhotoSourceSheet() { document.getElementById('photoSourceSheet').classList.add('open'); }
+function closePhotoSheet(e) {
+  if (!e || e.target === document.getElementById('photoSourceSheet')) {
+    document.getElementById('photoSourceSheet').classList.remove('open');
+  }
+}
+function closePhotoSheetAndDo(mode) {
+  document.getElementById('photoSourceSheet').classList.remove('open');
+  if (mode === 'ai') {
+    sendQuick('AI画像を生成して投稿したい');
+  } else if (mode === 'library') {
+    document.getElementById('photoFileInput').click();
+  } else if (mode === 'camera') {
+    document.getElementById('cameraFileInput').click();
+  }
+}
+
+// ============================================================
+// 投稿案タイプ選択
+// ============================================================
+function openPostTypeSheet() { document.getElementById('postTypeSheet').classList.add('open'); }
+function closePostSheet(e) {
+  if (!e || e.target === document.getElementById('postTypeSheet')) {
+    document.getElementById('postTypeSheet').classList.remove('open');
+  }
+}
+function closePostSheetAndDo(mode) {
+  document.getElementById('postTypeSheet').classList.remove('open');
+  if (mode === 'text') {
+    sendQuick('投稿案を3つ作って');
+  } else if (mode === 'image') {
+    sendQuick('AI画像も一緒に投稿案を作って。画像を生成してから投稿文を考えて');
+  }
+}
+
+// ============================================================
+// 苦情対応モーダル
+// ============================================================
+function openComplaintModal() { document.getElementById('complaintOverlay').classList.add('open'); }
+function closeComplaintModal(e) {
+  if (!e || e.target === document.getElementById('complaintOverlay')) {
+    document.getElementById('complaintOverlay').classList.remove('open');
+    document.getElementById('complaintText').value = '';
+    document.querySelectorAll('.style-chip').forEach(c => c.classList.remove('selected'));
+  }
+}
+function toggleStyle(el) { el.classList.toggle('selected'); }
+function submitComplaint() {
+  const text = document.getElementById('complaintText').value.trim();
+  if (!text) { alert('口コミの内容を入力してください'); return; }
+  const styles = [...document.querySelectorAll('.style-chip.selected')].map(c => c.textContent);
+  const styleStr = styles.length ? `対応スタイル：${styles.join('・')}。` : '';
+  const msg = `以下の苦情口コミへの返信文を作って。${styleStr}\n\n口コミ内容：\n${text}`;
+  closeComplaintModal();
+  sendQuick(msg);
 }
 
 function sendQuick(text) { document.getElementById('msgInput').value = text; sendMessage(); }
