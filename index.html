@@ -286,6 +286,27 @@ body {
 .send-btn svg { width: 16px; height: 16px; }
 .send-btn:disabled { background: var(--border); cursor: default; }
 .send-btn:not(:disabled):hover { opacity: .85; }
+
+/* ---- スマホ試用QRカード（デスクトップのみ表示） ---- */
+.qr-card {
+  position: fixed; bottom: 28px; right: 28px; z-index: 100;
+  background: white; border-radius: 16px;
+  padding: 16px 18px; text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  display: none;
+}
+@media (min-width: 520px) { .qr-card { display: block; } }
+.qr-card-label {
+  font-size: 11px; font-weight: 700; color: var(--text-mid);
+  letter-spacing: .04em; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.qr-card-label svg { width: 13px; height: 13px; flex-shrink: 0; }
+#qrcode canvas, #qrcode img { display: block; border-radius: 8px; }
+.qr-card-url {
+  font-size: 9px; color: var(--text-mid); margin-top: 8px;
+  word-break: break-all; max-width: 120px;
+}
 </style>
 </head>
 <body>
@@ -366,6 +387,19 @@ body {
   </div>
 </div>
 
+<!-- スマホ試用QRカード -->
+<div class="qr-card">
+  <div class="qr-card-label">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
+    </svg>
+    スマホで試す
+  </div>
+  <div id="qrcode"></div>
+  <div class="qr-card-url">dat0925.github.io/meo-agent/</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 // ============================================================
 // モックデータ
@@ -460,7 +494,14 @@ const SYSTEM_PROMPT = `あなたは「MEOコンシェルジュ」です。
 - 店舗情報の変更（住所・業種・電話・営業時間・定休日・紹介文・URL）
 - キーワード検索順位の確認
 - 月次レポートの生成
-- AI画像生成（OpenAI gpt-image-1）してGBPに投稿
+- AI画像生成（gpt-image-1）→ 生成後にUI上で「①写真としてアップ」「②投稿として公開」を選択可能（※投稿に添付した写真はGBP写真フォルダにも自動追加されます）
+
+## AI画像生成の対応
+ユーザーがAI画像生成を依頼したら:
+1. テーマや内容を確認（例：「どんな画像を作りますか？」）
+2. generate_ai_image ツールを呼ぶ（英語プロンプトで詳細に記述）
+3. 生成後はUI側が自動的に選択ボタンを表示するため、あなたは「生成しました！」と一言添えるだけでよい
+※GBPの仕様上「投稿する＝写真フォルダにも追加される」ため、投稿して写真フォルダに追加しない、という操作はできません。
 
 ## 写真受信時の対応
 ユーザーが写真を送ってきたら:
@@ -745,6 +786,15 @@ function showWelcome() {
 window.addEventListener('DOMContentLoaded', function() {
   updateReviewBadge();
   showWelcome();
+  document.getElementById('quickBtns').addEventListener('wheel', function(e) {
+    if (e.deltaY !== 0) { e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY; }
+  }, { passive: false });
+  new QRCode(document.getElementById('qrcode'), {
+    text: 'https://dat0925.github.io/meo-agent/',
+    width: 120, height: 120,
+    colorDark: '#1a7a4a', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M,
+  });
 });
 </script>
 </body>
