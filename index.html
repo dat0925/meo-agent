@@ -172,6 +172,43 @@ body {
   padding: 3px 12px;
 }
 
+/* ---- 承認カード ---- */
+.approval-card {
+  background: #fffbeb; border: 2px solid #f59e0b;
+  border-radius: 16px; padding: 16px; margin: 4px 0;
+  max-width: 88%;
+}
+.approval-card-header {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 800; color: #92400e; margin-bottom: 10px;
+}
+.approval-card-title {
+  font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px;
+}
+.approval-card-body {
+  font-size: 12.5px; color: var(--text-mid); background: white;
+  border-radius: 8px; padding: 10px 12px; line-height: 1.65;
+  white-space: pre-wrap; margin-bottom: 12px;
+  border: 1px solid var(--border);
+}
+.approval-btns { display: flex; gap: 8px; }
+.approval-btn-ok {
+  flex: 1; padding: 10px; background: var(--green); color: white;
+  border: none; border-radius: 10px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: opacity .15s;
+}
+.approval-btn-ok:hover { opacity: .85; }
+.approval-btn-cancel {
+  flex: 1; padding: 10px; background: white; color: var(--text-mid);
+  border: 1.5px solid var(--border); border-radius: 10px; font-size: 13px;
+  font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.approval-btn-cancel:hover { border-color: #ef4444; color: #ef4444; }
+.approval-done {
+  font-size: 12px; color: var(--text-mid); display: flex;
+  align-items: center; gap: 5px; padding-top: 4px;
+}
+
 /* ---- クイックボタン ---- */
 .quick-btns-wrap {
   background: var(--white); border-top: 1px solid var(--border);
@@ -393,16 +430,18 @@ const SYSTEM_PROMPT = `あなたは「MEOコンシェルジュ」です。
 ## 写真受信時の対応
 ユーザーが写真を送ってきたら:
 1. 写真の内容を一言コメント（料理・内観・外観・スタッフなどを判断）
-2. GBPのカテゴリを提案（FOOD/INTERIOR/EXTERIOR/TEAM）
-3. 「このカテゴリでGBPに追加しますか？」と確認
-4. 承認されたら upload_photo_to_gbp ツールを呼んでアップロード完了を報告
+2. GBPのカテゴリを判断（FOOD/INTERIOR/EXTERIOR/TEAM）
+3. すぐに upload_photo_to_gbp ツールを呼ぶ（UIが承認確認を挟む）
 
 ## 店舗情報変更の対応
-1. 変更したい項目を確認
+1. 変更したい項目と新しい値を確認
 2. get_store_info で現在値を取得して提示
-3. 新しい値を確認
-4. 「GBPに反映しますか？」と確認
-5. 承認されたら update_store_info で更新して完了を報告
+3. すぐに update_store_info で更新する（UIが承認確認を挟む）
+
+## 重要：承認フローについて
+reply_to_review / create_gbp_post / upload_photo_to_gbp / update_store_info の4つのツールは、
+UI側で自動的に承認確認ダイアログを表示する。
+あなたはチャットで「承認しますか？」と二重に聞かず、内容が揃ったら即座にツールを呼ぶこと。
 
 ## 行動原則
 1. 短く・具体的に：LINEで読むことを意識して返答は簡潔に
@@ -420,6 +459,46 @@ let pendingPhotoBase64 = null;
 let pendingPhotoMime = null;
 
 const CLAUDE_PROXY_URL = 'https://sfhtvtcmgueystyuhzvd.supabase.co/functions/v1/claude-proxy';
+
+const APPROVAL_REQUIRED = new Set(['reply_to_review', 'create_gbp_post', 'upload_photo_to_gbp', 'update_store_info']);
+let pendingApprovalResolve = null;
+
+function approveAction(approved, cardEl) {
+  cardEl.querySelector('.approval-btns').innerHTML =
+    approved
+      ? '<span class="approval-done">✅ 承認しました。実行します…</span>'
+      : '<span class="approval-done">❌ キャンセルしました。</span>';
+  if (pendingApprovalResolve) { pendingApprovalResolve(approved); pendingApprovalResolve = null; }
+}
+
+function approvalLabel(name, input) {
+  if (name === 'reply_to_review')  return { title: '口コミに返信する', body: input.reply_text };
+  if (name === 'create_gbp_post')  return { title: 'GBPに投稿を公開する', body: input.text };
+  if (name === 'upload_photo_to_gbp') return { title: `写真をGBPにアップロードする（${input.category}）`, body: input.caption || '（キャプションなし）' };
+  if (name === 'update_store_info') return { title: `店舗情報「${input.field}」を変更する`, body: `新しい値：${input.value}` };
+  return { title: name, body: JSON.stringify(input) };
+}
+
+function showApprovalCard(block) {
+  const { title, body } = approvalLabel(block.name, block.input || {});
+  const el = document.getElementById('messages');
+  const wrap = document.createElement('div');
+  wrap.className = 'msg bot';
+  wrap.innerHTML = `<div class="avatar">${BOT_AVATAR_SVG}</div><div class="bubble" style="padding:0;background:none;box-shadow:none;">
+    <div class="approval-card">
+      <div class="approval-card-header">⚠️ 実行前に確認してください</div>
+      <div class="approval-card-title">${esc(title)}</div>
+      <div class="approval-card-body">${esc(body)}</div>
+      <div class="approval-btns">
+        <button class="approval-btn-ok" onclick="approveAction(true, this.closest('.approval-card'))">✅ 承認して実行</button>
+        <button class="approval-btn-cancel" onclick="approveAction(false, this.closest('.approval-card'))">❌ キャンセル</button>
+      </div>
+    </div>
+  </div>`;
+  el.appendChild(wrap);
+  el.scrollTop = el.scrollHeight;
+  return wrap;
+}
 
 async function callClaude(userMessage, imageBase64, imageMime) {
   let userContent;
@@ -458,6 +537,14 @@ async function callClaude(userMessage, imageBase64, imageMime) {
       for (const block of data.content) {
         if (block.type !== 'tool_use') continue;
         toolsCalled.push(block.name);
+        if (APPROVAL_REQUIRED.has(block.name)) {
+          showApprovalCard(block);
+          const approved = await new Promise(resolve => { pendingApprovalResolve = resolve; });
+          if (!approved) {
+            results.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify({ cancelled: true, message: 'ユーザーがキャンセルしました。実行しないでください。' }) });
+            continue;
+          }
+        }
         results.push({ type: 'tool_result', tool_use_id: block.id, content: JSON.stringify(executeTool(block.name, block.input||{})) });
       }
       messages.push({ role: 'user', content: results });
