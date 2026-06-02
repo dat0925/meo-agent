@@ -396,6 +396,43 @@ body {
 }
 .qb-btn-tertiary:hover .qb-ter-label { color: var(--green); }
 
+/* ---- AI設定：業種チップ ---- */
+.genre-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.genre-chip {
+  padding: 6px 12px; border-radius: 100px; font-size: 12px; font-weight: 700;
+  border: 1.5px solid var(--border); background: var(--white);
+  cursor: pointer; font-family: inherit; color: var(--text-mid);
+  transition: all .15s;
+}
+.genre-chip.selected { border-color: var(--green); background: var(--green-light); color: var(--green); }
+
+/* ---- AI設定：口調ボタン ---- */
+.tone-btns { display: flex; gap: 0; margin-top: 4px; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.tone-btn {
+  flex: 1; padding: 7px 4px; font-size: 12px; font-weight: 700;
+  border: none; background: var(--white); cursor: pointer; font-family: inherit;
+  color: var(--text-mid); transition: all .15s;
+  border-right: 1px solid var(--border);
+}
+.tone-btn:last-child { border-right: none; }
+.tone-btn.selected { background: var(--green); color: white; }
+
+/* ---- AI設定：NGワード・フレーズタグ ---- */
+.ng-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 100px; font-size: 11px; font-weight: 600;
+  background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;
+}
+.ng-tag button { background: none; border: none; cursor: pointer; color: #dc2626; font-size: 12px; line-height: 1; padding: 0; }
+.phrase-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 100px; font-size: 11px; font-weight: 600;
+  background: var(--green-light); color: var(--green); border: 1px solid rgba(26,122,74,.2);
+}
+.phrase-tag button { background: none; border: none; cursor: pointer; color: var(--green); font-size: 12px; line-height: 1; padding: 0; }
+.settings-section-subtitle { font-size: 11px; font-weight: 700; color: var(--text-mid); margin: 12px 0 6px; }
+.settings-hint { font-size: 10.5px; color: var(--text-mid); margin-top: 4px; line-height: 1.5; }
+
 /* ---- 入力エリア ---- */
 .input-area {
   padding: 10px 14px 14px; background: var(--white);
@@ -808,6 +845,52 @@ body {
       <div class="settings-title">⚙️ 基本設定</div>
     </div>
     <div class="settings-body">
+
+      <!-- AI動作設定 -->
+      <div class="settings-section">
+        <div class="settings-section-title">🤖 AIの動作設定</div>
+
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+          <label>業種</label>
+          <div class="genre-chips" id="genreChips">
+            <button class="genre-chip" data-genre="restaurant" onclick="selectGenre(this)">🍽 飲食店</button>
+            <button class="genre-chip" data-genre="beauty" onclick="selectGenre(this)">💇 美容室</button>
+            <button class="genre-chip" data-genre="reform" onclick="selectGenre(this)">🏠 建築・リフォーム</button>
+            <button class="genre-chip" data-genre="other" onclick="selectGenre(this)">🏪 その他</button>
+          </div>
+        </div>
+
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+          <label>口調</label>
+          <div class="tone-btns" id="toneBtns">
+            <button class="tone-btn" data-tone="formal" onclick="selectTone(this)">丁寧</button>
+            <button class="tone-btn" data-tone="friendly" onclick="selectTone(this)">フレンドリー</button>
+            <button class="tone-btn" data-tone="casual" onclick="selectTone(this)">カジュアル</button>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <label>推しポイント</label>
+          <input class="settings-input" id="sAppealPoint" placeholder="例：創業30年の老舗、個室完備">
+        </div>
+
+        <div class="settings-section-subtitle">NGワード</div>
+        <div class="keyword-list" id="ngWordList"></div>
+        <div class="add-kw-row">
+          <input id="newNgWord" placeholder="例：値引き、他社比較" onkeydown="if(event.key==='Enter')addNgWord()">
+          <button class="add-kw-btn" onclick="addNgWord()">追加</button>
+        </div>
+        <p class="settings-hint">AIが絶対に使わない言葉を登録できます</p>
+
+        <div class="settings-section-subtitle">よく使うフレーズ</div>
+        <div class="keyword-list" id="preferredPhraseList"></div>
+        <div class="add-kw-row">
+          <input id="newPreferredPhrase" placeholder="例：またのお越しをお待ちしております" onkeydown="if(event.key==='Enter')addPreferredPhrase()">
+          <button class="add-kw-btn" onclick="addPreferredPhrase()">追加</button>
+        </div>
+        <p class="settings-hint">口コミ返信や投稿案に積極的に使わせたいフレーズ</p>
+      </div>
+
       <div class="settings-section">
         <div class="settings-section-title">店舗情報</div>
         <div class="settings-row"><label>店舗名</label><input class="settings-input" id="sStoreName" placeholder="例：焼肉 大将"></div>
@@ -1118,10 +1201,70 @@ async function executeTool(name, input) {
 // ============================================================
 // Claude API
 // ============================================================
-const SYSTEM_PROMPT = `あなたは「MEOコンシェルジュ」です。
+
+// 業種別プリセット
+const GENRE_PRESETS = {
+  restaurant: {
+    label: '飲食店',
+    systemAddition: `業種: 飲食店
+重点訴求: 季節感・食材の産地・雰囲気・予約のしやすさ
+口コミ返信で必ず含める: 再来店への感謝、具体的なメニュー名や季節の料理への言及
+NGにすべき対応: 「値段が高い」への直接反論、過度な割引訴求`,
+  },
+  beauty: {
+    label: '美容室・サロン',
+    systemAddition: `業種: 美容室・サロン
+重点訴求: スタッフの技術力・丁寧なカウンセリング・再来店しやすい雰囲気
+口コミ返信で必ず含める: 担当スタッフへの感謝の言及、次回予約への自然な誘導
+NGにすべき対応: 価格交渉への直接回答、曖昧な施術効果の約束`,
+  },
+  reform: {
+    label: '建築・リフォーム',
+    systemAddition: `業種: 建築・リフォーム業
+重点訴求: 施工実績・アフターサポートの充実・対応エリア・安心感
+口コミ返信で必ず含める: 施工へのこだわりや品質保証への言及
+NGにすべき対応: 曖昧な工期や価格の約束、競合他社への言及`,
+  },
+  other: {
+    label: 'その他',
+    systemAddition: `業種: 店舗・サービス業`,
+  },
+};
+
+const TONE_PRESETS = {
+  formal:   '丁寧語・敬語を基本とし、プロフェッショナルで信頼感のある文体で書いてください。',
+  friendly: '親しみやすく、絵文字を適度に使った読みやすい文体で書いてください。',
+  casual:   'カジュアルで話しかけるような文体で書いてください。常体も可です。',
+};
+
+function buildSystemPrompt(s) {
+  const preset = GENRE_PRESETS[s.genre] || GENRE_PRESETS.other;
+  const tone = TONE_PRESETS[s.tone] || TONE_PRESETS.friendly;
+  const ngSection = s.ngWords && s.ngWords.length
+    ? '
+## 絶対に使わない表現
+' + s.ngWords.map(w => '- 「' + w + '」').join('
+')
+    : '';
+  const phraseSection = s.preferredPhrases && s.preferredPhrases.length
+    ? '
+## 積極的に使うフレーズ
+' + s.preferredPhrases.map(p => '- 「' + p + '」').join('
+')
+    : '';
+  const appealSection = s.appealPoint
+    ? '
+店舗の強み・推しポイント: ' + s.appealPoint
+    : '';
+
+  return `あなたは「MEOコンシェルジュ」です。
 店舗オーナーのLINEの相棒として、Google ビジネスプロフィール（GBP）の管理を全面的にサポートします。
 
-担当店舗: 焼肉 大将（焼肉店）
+担当店舗: ${s.storeName || '（未設定）'}
+${preset.systemAddition}${appealSection}
+
+## 文体・口調
+${tone}${ngSection}${phraseSection}
 
 ## できること
 - 口コミ返信の生成・投稿
@@ -1131,14 +1274,13 @@ const SYSTEM_PROMPT = `あなたは「MEOコンシェルジュ」です。
 - 店舗情報の変更（住所・業種・電話・営業時間・定休日・紹介文・URL）
 - キーワード検索順位の確認
 - 月次レポートの生成
-- AI画像生成（gpt-image-1）→ 生成後にUI上で「①写真としてアップ」「②投稿として公開」を選択可能（※投稿に添付した写真はGBP写真フォルダにも自動追加されます）
+- AI画像生成（gpt-image-1）→ 生成後にUI上で「①写真としてアップ」「②投稿として公開」を選択可能
 
 ## AI画像生成の対応
 ユーザーがAI画像生成を依頼したら:
 1. テーマや内容を確認（例：「どんな画像を作りますか？」）
 2. generate_ai_image ツールを呼ぶ（英語プロンプトで詳細に記述）
 3. 生成後はUI側が自動的に選択ボタンを表示するため、あなたは「生成しました！」と一言添えるだけでよい
-※GBPの仕様上「投稿する＝写真フォルダにも追加される」ため、投稿して写真フォルダに追加しない、という操作はできません。
 
 ## 写真受信時の対応
 ユーザーが写真を送ってきたら:
@@ -1154,18 +1296,18 @@ const SYSTEM_PROMPT = `あなたは「MEOコンシェルジュ」です。
 ## 重要：承認フローについて
 reply_to_review / create_gbp_post / upload_photo_to_gbp / update_store_info の4つのツールは、
 UI側で自動的に承認確認ダイアログを表示する。
-あなたはチャットで「承認しますか？」と二重に聞かず、内容が揃ったら即座にツールを呼ぶこと。
+あなたはチャットで「承認しますか？」と二重に聞わず、内容が揃ったら即座にツールを呼ぶこと。
 
 ## 行動原則
 1. 短く・具体的に：LINEで読むことを意識して返答は簡潔に
-2. 行動を促す：提案後は「承認しますか？」「投稿しましょうか？」と次のアクションを明示
+2. 行動を促す：提案後は「投稿しましょうか？」と次のアクションを明示
 3. 感情を汲む：苦情口コミは特に丁寧に扱う
 4. ツールを使う：情報が必要な場合は必ずツールを呼び出す
 
 ## 返答スタイル
-- 絵文字を適度に使って親しみやすく
 - 口コミ返信文・投稿案は「」で囲んで提示する
 - 選択肢がある場合は番号リストで提示する`;
+}
 
 let conversationHistory = [];
 let pendingPhotoBase64 = null;
@@ -1235,7 +1377,7 @@ async function callClaude(userMessage, imageBase64, imageMime) {
     const res = await fetch(CLAUDE_PROXY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024, system: SYSTEM_PROMPT, tools: TOOLS, messages }),
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1024, system: buildSystemPrompt(appSettings), tools: TOOLS, messages }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -1367,13 +1509,31 @@ async function sendMessage() {
 // ============================================================
 // 基本設定
 // ============================================================
-let appSettings = JSON.parse(localStorage.getItem('meo_settings') || '{"storeName":"焼肉 大将","storeId":"","keywords":["焼肉 渋谷","焼肉 個室 渋谷","和牛 渋谷"],"locations":[{"name":"渋谷駅前","address":"東京都渋谷区道玄坂1丁目"}]}');
+const DEFAULT_SETTINGS = {
+  storeName: '焼肉 大将', storeId: '',
+  keywords: ['焼肉 渋谷', '焼肉 個室 渋谷', '和牛 渋谷'],
+  locations: [{ name: '渋谷駅前', address: '東京都渋谷区道玄坂1丁目' }],
+  genre: 'restaurant', tone: 'friendly',
+  appealPoint: '', ngWords: [], preferredPhrases: [],
+};
+let appSettings = Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem('meo_settings') || '{}'));
 
 function openSettings() {
   document.getElementById('sStoreName').value = appSettings.storeName || '';
   document.getElementById('sStoreId').value = appSettings.storeId || '';
+  document.getElementById('sAppealPoint').value = appSettings.appealPoint || '';
   renderKeywords();
   renderLocations();
+  renderNgWords();
+  renderPreferredPhrases();
+  // 業種チップ
+  document.querySelectorAll('.genre-chip').forEach(el => {
+    el.classList.toggle('selected', el.dataset.genre === (appSettings.genre || 'restaurant'));
+  });
+  // 口調ボタン
+  document.querySelectorAll('.tone-btn').forEach(el => {
+    el.classList.toggle('selected', el.dataset.tone === (appSettings.tone || 'friendly'));
+  });
   document.getElementById('settingsPanel').classList.add('open');
 }
 function closeSettings() { document.getElementById('settingsPanel').classList.remove('open'); }
@@ -1411,10 +1571,58 @@ function removeLocation(i) { appSettings.locations.splice(i, 1); renderLocations
 function saveSettings() {
   appSettings.storeName = document.getElementById('sStoreName').value.trim();
   appSettings.storeId = document.getElementById('sStoreId').value.trim();
+  appSettings.appealPoint = document.getElementById('sAppealPoint').value.trim();
   localStorage.setItem('meo_settings', JSON.stringify(appSettings));
   closeSettings();
-  addMessage('bot', `✅ 設定を保存しました！\n\nキーワード：${appSettings.keywords.join('、')}\n計測地点：${appSettings.locations.map(l=>l.name).join('、')}`);
+  const genreLabel = (GENRE_PRESETS[appSettings.genre] || GENRE_PRESETS.other).label;
+  const toneLabel = { formal: '丁寧', friendly: 'フレンドリー', casual: 'カジュアル' }[appSettings.tone] || 'フレンドリー';
+  addMessage('bot', `✅ 設定を保存しました！\n\n業種：${genreLabel}　口調：${toneLabel}\nNGワード：${appSettings.ngWords && appSettings.ngWords.length ? appSettings.ngWords.join('、') : 'なし'}\nフレーズ：${appSettings.preferredPhrases && appSettings.preferredPhrases.length ? appSettings.preferredPhrases.join('、') : 'なし'}`);
 }
+
+function selectGenre(el) {
+  document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  appSettings.genre = el.dataset.genre;
+}
+function selectTone(el) {
+  document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  appSettings.tone = el.dataset.tone;
+}
+
+function renderNgWords() {
+  const el = document.getElementById('ngWordList');
+  el.innerHTML = (appSettings.ngWords || []).map((w, i) =>
+    `<span class="ng-tag">${esc(w)}<button onclick="removeNgWord(${i})">×</button></span>`
+  ).join('');
+}
+function addNgWord() {
+  const input = document.getElementById('newNgWord');
+  const w = input.value.trim();
+  if (!w) return;
+  if (!appSettings.ngWords) appSettings.ngWords = [];
+  appSettings.ngWords.push(w);
+  input.value = '';
+  renderNgWords();
+}
+function removeNgWord(i) { appSettings.ngWords.splice(i, 1); renderNgWords(); }
+
+function renderPreferredPhrases() {
+  const el = document.getElementById('preferredPhraseList');
+  el.innerHTML = (appSettings.preferredPhrases || []).map((p, i) =>
+    `<span class="phrase-tag">${esc(p)}<button onclick="removePreferredPhrase(${i})">×</button></span>`
+  ).join('');
+}
+function addPreferredPhrase() {
+  const input = document.getElementById('newPreferredPhrase');
+  const p = input.value.trim();
+  if (!p) return;
+  if (!appSettings.preferredPhrases) appSettings.preferredPhrases = [];
+  appSettings.preferredPhrases.push(p);
+  input.value = '';
+  renderPreferredPhrases();
+}
+function removePreferredPhrase(i) { appSettings.preferredPhrases.splice(i, 1); renderPreferredPhrases(); }
 
 // ============================================================
 // 写真ソース選択
