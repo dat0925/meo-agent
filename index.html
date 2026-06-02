@@ -286,57 +286,115 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,.1);
 }
 
-/* ---- デザインB：グループ化クイックボタン ---- */
-.quick-btns-b { display: none; flex-direction: column; gap: 8px; }
+/* ---- デザインB：メリハリ案 ---- */
+.quick-btns-b { display: none; flex-direction: column; gap: 7px; }
 .quick-btns-b.visible { display: flex; }
 .quick-btns-a.hidden { display: none; }
 
-.qb-group {}
-.qb-group-label {
-  font-size: 9.5px; font-weight: 700; color: var(--text-mid);
-  letter-spacing: .07em; text-transform: uppercase;
-  margin-bottom: 5px; padding-left: 2px;
-}
-.qb-row {
-  display: flex; gap: 6px;
-}
-.qb-btn {
-  flex: 1; display: flex; align-items: center; gap: 8px;
-  padding: 9px 11px; border-radius: 12px; border: 1.5px solid var(--border);
+/* 大ボタン行（2分割） */
+.qb-row-primary { display: flex; gap: 7px; }
+
+/* 大ボタン */
+.qb-btn-primary {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+  padding: 11px 13px; border-radius: 14px;
+  border: 1.5px solid var(--border);
   background: var(--white); cursor: pointer; font-family: inherit;
   transition: border-color .15s, background .15s, transform .1s;
   text-align: left; min-width: 0;
 }
-.qb-btn:hover { border-color: var(--green); background: var(--green-light); transform: translateY(-1px); }
-.qb-btn:active { transform: translateY(0); }
-.qb-btn-icon {
-  width: 28px; height: 28px; border-radius: 8px;
+.qb-btn-primary:hover { border-color: var(--green); background: var(--green-light); transform: translateY(-1px); }
+.qb-btn-primary:active { transform: translateY(0); }
+
+/* 大ボタン：口コミはアクセントカラーで強調 */
+.qb-btn-primary.highlight {
+  background: var(--green); border-color: var(--green);
+}
+.qb-btn-primary.highlight:hover { background: var(--green-dark); border-color: var(--green-dark); transform: translateY(-1px); }
+.qb-btn-primary.highlight .qb-pri-icon { background: rgba(255,255,255,.2); color: white; }
+.qb-btn-primary.highlight .qb-pri-label { color: white; }
+.qb-btn-primary.highlight .qb-pri-desc { color: rgba(255,255,255,.75); }
+
+.qb-pri-icon {
+  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
   background: var(--green-light); color: var(--green);
   display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: background .15s;
+  transition: background .15s;
 }
-.qb-btn:hover .qb-btn-icon { background: rgba(26,122,74,.22); }
-.qb-btn-icon svg { width: 15px; height: 15px; }
-.qb-btn-icon.accent { background: #fef3c7; color: #d97706; }
-.qb-btn:hover .qb-btn-icon.accent { background: #fde68a; }
-.qb-btn-icon.muted { background: #f0f0f5; color: #6e6e73; }
-.qb-btn:hover .qb-btn-icon.muted { background: #e4e4ed; }
-.qb-btn-text { min-width: 0; }
-.qb-btn-label {
-  font-size: 11.5px; font-weight: 700; color: var(--text);
+.qb-pri-icon svg { width: 16px; height: 16px; }
+.qb-btn-primary:not(.highlight):hover .qb-pri-icon { background: rgba(26,122,74,.2); }
+.qb-pri-text { min-width: 0; }
+.qb-pri-label {
+  font-size: 12px; font-weight: 800; color: var(--text);
   line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.qb-btn-desc {
-  font-size: 9.5px; color: var(--text-mid); margin-top: 1px;
+.qb-pri-desc {
+  font-size: 10px; color: var(--text-mid); margin-top: 1px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.qb-btn-badge-wrap { position: relative; display: inline-flex; }
+
+/* バッジ（大ボタン用） */
+.qb-pri-badge-wrap { position: relative; display: inline-flex; flex-shrink: 0; }
 .qb-badge {
-  position: absolute; top: -4px; right: -6px;
+  position: absolute; top: -5px; right: -7px;
   background: #ef4444; color: white;
-  font-size: 8px; font-weight: 800; line-height: 1;
-  padding: 2px 4px; border-radius: 100px; min-width: 14px; text-align: center;
+  font-size: 9px; font-weight: 800; line-height: 1;
+  padding: 2px 5px; border-radius: 100px; min-width: 16px; text-align: center;
 }
+
+/* 中ボタン行（3分割） */
+.qb-row-secondary { display: flex; gap: 7px; }
+
+.qb-btn-secondary {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 5px; padding: 9px 4px 8px;
+  border-radius: 12px; border: 1.5px solid var(--border);
+  background: var(--white); cursor: pointer; font-family: inherit;
+  transition: border-color .15s, background .15s, transform .1s;
+  min-width: 0;
+}
+.qb-btn-secondary:hover { border-color: var(--green); background: var(--green-light); transform: translateY(-1px); }
+.qb-btn-secondary:active { transform: translateY(0); }
+
+.qb-sec-icon {
+  width: 26px; height: 26px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--green-light); color: var(--green);
+  transition: background .15s; flex-shrink: 0;
+}
+.qb-sec-icon svg { width: 13px; height: 13px; }
+.qb-btn-secondary:hover .qb-sec-icon { background: rgba(26,122,74,.2); }
+.qb-sec-icon.accent { background: #fef3c7; color: #d97706; }
+.qb-btn-secondary:hover .qb-sec-icon.accent { background: #fde68a; }
+.qb-sec-label {
+  font-size: 10px; font-weight: 700; color: var(--text);
+  text-align: center; line-height: 1.2; white-space: nowrap;
+}
+
+/* 小ボタン行（5分割：データ系） */
+.qb-row-tertiary {
+  display: flex; gap: 5px;
+  padding-top: 2px;
+  border-top: 1px solid var(--border);
+}
+.qb-btn-tertiary {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 7px 2px 6px;
+  border-radius: 10px; border: none;
+  background: transparent; cursor: pointer; font-family: inherit;
+  transition: background .15s;
+  min-width: 0;
+}
+.qb-btn-tertiary:hover { background: var(--green-light); }
+.qb-btn-tertiary:active { background: rgba(26,122,74,.15); }
+.qb-ter-icon { color: var(--text-mid); display: flex; align-items: center; justify-content: center; }
+.qb-ter-icon svg { width: 14px; height: 14px; }
+.qb-btn-tertiary:hover .qb-ter-icon { color: var(--green); }
+.qb-ter-label {
+  font-size: 9px; font-weight: 600; color: var(--text-mid);
+  text-align: center; line-height: 1.2; white-space: nowrap;
+}
+.qb-btn-tertiary:hover .qb-ter-label { color: var(--green); }
 
 /* ---- 入力エリア ---- */
 .input-area {
@@ -645,88 +703,78 @@ body {
       <button class="quick-btn" onclick="openSettings()"><span class="quick-btn-icon">⚙️</span><span class="quick-btn-label">基本<br>設定</span></button>
     </div>
 
-    <!-- デザインB（グループ化・SVGアイコン版） -->
+    <!-- デザインB（メリハリ案） -->
     <div class="quick-btns-b" id="quickBtnsB">
 
-      <!-- グループ1：返信・投稿アクション -->
-      <div class="qb-group">
-        <div class="qb-group-label">返信・投稿</div>
-        <div class="qb-row">
-          <button class="qb-btn" onclick="sendQuick('未返信の口コミを見せて')">
-            <span class="qb-btn-badge-wrap">
-              <span class="qb-btn-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              </span>
-              <span class="qb-badge" id="reviewBadgeB" style="display:none"></span>
+      <!-- 大ボタン2個：最頻出アクション -->
+      <div class="qb-row-primary">
+        <button class="qb-btn-primary highlight" onclick="sendQuick('未返信の口コミを見せて')">
+          <span class="qb-pri-badge-wrap">
+            <span class="qb-pri-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">未返信の口コミ</span><span class="qb-btn-desc">返信待ちを一覧表示</span></span>
-          </button>
-          <button class="qb-btn" onclick="openComplaintModal()">
-            <span class="qb-btn-icon accent">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">苦情対応</span><span class="qb-btn-desc">返信文を自動生成</span></span>
-          </button>
-        </div>
-        <div class="qb-row">
-          <button class="qb-btn" onclick="openPostTypeSheet()">
-            <span class="qb-btn-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">投稿案を作成</span><span class="qb-btn-desc">AIが下書きを生成</span></span>
-          </button>
-          <button class="qb-btn" onclick="openPhotoSourceSheet()">
-            <span class="qb-btn-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">写真を投稿</span><span class="qb-btn-desc">GBPに写真を追加</span></span>
-          </button>
-          <button class="qb-btn" onclick="sendQuick('店舗情報を変更したい')">
-            <span class="qb-btn-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">店舗情報変更</span><span class="qb-btn-desc">住所・時間など</span></span>
-          </button>
-        </div>
+            <span class="qb-badge" id="reviewBadgeB" style="display:none"></span>
+          </span>
+          <span class="qb-pri-text">
+            <span class="qb-pri-label">未返信の口コミ</span>
+            <span class="qb-pri-desc">返信待ちを確認する</span>
+          </span>
+        </button>
+        <button class="qb-btn-primary" onclick="openPostTypeSheet()">
+          <span class="qb-pri-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </span>
+          <span class="qb-pri-text">
+            <span class="qb-pri-label">投稿案を作成</span>
+            <span class="qb-pri-desc">AIが下書きを生成</span>
+          </span>
+        </button>
       </div>
 
-      <!-- グループ2：データ確認 -->
-      <div class="qb-group">
-        <div class="qb-group-label">データ確認</div>
-        <div class="qb-row">
-          <button class="qb-btn" onclick="sendQuick('先月のアクセスデータを教えて')">
-            <span class="qb-btn-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">アクセスデータ</span><span class="qb-btn-desc">先月の閲覧・経路数</span></span>
-          </button>
-          <button class="qb-btn" onclick="sendQuick('キーワード順位を教えて')">
-            <span class="qb-btn-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">キーワード順位</span><span class="qb-btn-desc">検索表示の現在位置</span></span>
-          </button>
-          <button class="qb-btn" onclick="sendQuick('今月の月次レポートをまとめて')">
-            <span class="qb-btn-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">月次レポート</span><span class="qb-btn-desc">今月のまとめを生成</span></span>
-          </button>
-        </div>
-        <div class="qb-row">
-          <button class="qb-btn" onclick="sendQuick('最近の投稿状況は？')">
-            <span class="qb-btn-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">投稿状況</span><span class="qb-btn-desc">最近の更新履歴</span></span>
-          </button>
-          <button class="qb-btn" onclick="openSettings()">
-            <span class="qb-btn-icon muted">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </span>
-            <span class="qb-btn-text"><span class="qb-btn-label">基本設定</span><span class="qb-btn-desc">店舗・キーワード設定</span></span>
-          </button>
-        </div>
+      <!-- 中ボタン3個：次点アクション -->
+      <div class="qb-row-secondary">
+        <button class="qb-btn-secondary" onclick="openComplaintModal()">
+          <span class="qb-sec-icon accent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </span>
+          <span class="qb-sec-label">苦情対応</span>
+        </button>
+        <button class="qb-btn-secondary" onclick="openPhotoSourceSheet()">
+          <span class="qb-sec-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </span>
+          <span class="qb-sec-label">写真を投稿</span>
+        </button>
+        <button class="qb-btn-secondary" onclick="sendQuick('店舗情報を変更したい')">
+          <span class="qb-sec-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </span>
+          <span class="qb-sec-label">店舗情報</span>
+        </button>
+      </div>
+
+      <!-- 小ボタン5個：データ確認・設定 -->
+      <div class="qb-row-tertiary">
+        <button class="qb-btn-tertiary" onclick="sendQuick('先月のアクセスデータを教えて')">
+          <span class="qb-ter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+          <span class="qb-ter-label">アクセス</span>
+        </button>
+        <button class="qb-btn-tertiary" onclick="sendQuick('キーワード順位を教えて')">
+          <span class="qb-ter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <span class="qb-ter-label">順位</span>
+        </button>
+        <button class="qb-btn-tertiary" onclick="sendQuick('今月の月次レポートをまとめて')">
+          <span class="qb-ter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+          <span class="qb-ter-label">レポート</span>
+        </button>
+        <button class="qb-btn-tertiary" onclick="sendQuick('最近の投稿状況は？')">
+          <span class="qb-ter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          <span class="qb-ter-label">投稿状況</span>
+        </button>
+        <button class="qb-btn-tertiary" onclick="openSettings()">
+          <span class="qb-ter-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="qb-ter-label">設定</span>
+        </button>
       </div>
 
     </div>
