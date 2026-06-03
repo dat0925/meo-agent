@@ -1240,21 +1240,14 @@ const TONE_PRESETS = {
 function buildSystemPrompt(s) {
   const preset = GENRE_PRESETS[s.genre] || GENRE_PRESETS.other;
   const tone = TONE_PRESETS[s.tone] || TONE_PRESETS.friendly;
-  const ngSection = s.ngWords && s.ngWords.length
-    ? '
-## 絶対に使わない表現
-' + s.ngWords.map(w => '- 「' + w + '」').join('
-')
+  const ngSection = (s.ngWords && s.ngWords.length)
+    ? ('\n## 絶対に使わない表現\n' + s.ngWords.map(function(w){ return '- 「' + w + '」'; }).join('\n'))
     : '';
-  const phraseSection = s.preferredPhrases && s.preferredPhrases.length
-    ? '
-## 積極的に使うフレーズ
-' + s.preferredPhrases.map(p => '- 「' + p + '」').join('
-')
+  const phraseSection = (s.preferredPhrases && s.preferredPhrases.length)
+    ? ('\n## 積極的に使うフレーズ\n' + s.preferredPhrases.map(function(p){ return '- 「' + p + '」'; }).join('\n'))
     : '';
   const appealSection = s.appealPoint
-    ? '
-店舗の強み・推しポイント: ' + s.appealPoint
+    ? ('\n店舗の強み・推しポイント: ' + s.appealPoint)
     : '';
 
   return `あなたは「MEOコンシェルジュ」です。
