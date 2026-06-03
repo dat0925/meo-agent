@@ -444,6 +444,36 @@ body {
   font-size: 13px; color: var(--text); font-weight: 600;
   margin-bottom: 8px; display: block;
 }
+/* 業態補足フィールド（業種選択で表示切替） */
+.genre-sub-wrap { padding: 0 16px 14px; display: none; }
+.genre-sub-wrap.visible { display: block; }
+.genre-sub-label {
+  font-size: 11px; font-weight: 700; color: var(--green);
+  margin-bottom: 6px; display: flex; align-items: center; gap: 4px;
+}
+.genre-sub-required { color: #ef4444; font-size: 11px; }
+/* 返信者ポジション */
+.responder-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+.responder-btn {
+  padding: 9px 6px; border-radius: 10px; font-size: 11.5px; font-weight: 700;
+  border: 1.5px solid var(--border); background: var(--white);
+  cursor: pointer; font-family: inherit; color: var(--text-mid);
+  transition: all .15s; text-align: center; line-height: 1.3;
+}
+.responder-btn.selected { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.responder-name-wrap { margin-top: 8px; display: none; }
+.responder-name-wrap.visible { display: block; }
+/* ターゲット客層 */
+.target-chips { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+.target-chip {
+  padding: 7px 12px; border-radius: 100px; font-size: 12px; font-weight: 700;
+  border: 1.5px solid var(--border); background: var(--white);
+  cursor: pointer; font-family: inherit; color: var(--text-mid);
+  transition: all .15s; white-space: nowrap;
+}
+.target-chip.selected { border-color: var(--green); background: var(--green-light); color: var(--green); }
+/* ヒントテキスト余白修正 */
+.settings-hint { font-size: 11px; color: var(--text-mid); padding: 6px 16px 16px; line-height: 1.5; display: block; }
 .settings-section-subtitle {
   font-size: 11px; font-weight: 700; color: var(--text-mid);
   padding: 14px 16px 6px; border-top: 1px solid var(--border);
@@ -871,16 +901,28 @@ body {
       <div class="settings-section">
         <div class="settings-section-title">🤖 AIの動作設定</div>
 
+        <!-- 業種 -->
         <div class="settings-row-col">
           <label>業種</label>
           <div class="genre-chips" id="genreChips">
             <button class="genre-chip" data-genre="restaurant" onclick="selectGenre(this)">🍽 飲食店</button>
-            <button class="genre-chip" data-genre="beauty" onclick="selectGenre(this)">💇 美容室</button>
+            <button class="genre-chip" data-genre="beauty" onclick="selectGenre(this)">💇 美容室・サロン</button>
             <button class="genre-chip" data-genre="reform" onclick="selectGenre(this)">🏠 建築・リフォーム</button>
             <button class="genre-chip" data-genre="other" onclick="selectGenre(this)">🏪 その他</button>
           </div>
         </div>
 
+        <!-- 業態補足（業種選択後に表示） -->
+        <div class="genre-sub-wrap" id="genreSubWrap">
+          <div class="genre-sub-label">
+            <span id="genreSubLabel">業態を教えてください</span>
+            <span class="genre-sub-required" id="genreSubRequired" style="display:none">＊必須</span>
+          </div>
+          <input class="settings-input" id="sGenreSub" placeholder="例：居酒屋・ランチカフェ" style="width:100%;box-sizing:border-box;">
+          <p style="font-size:10.5px;color:var(--text-mid);margin-top:5px;line-height:1.5;" id="genreSubHint">AIが業種に合わせた文章を生成するために使います</p>
+        </div>
+
+        <!-- 口調 -->
         <div class="settings-row-col">
           <label>口調</label>
           <div class="tone-btns" id="toneBtns">
@@ -888,28 +930,60 @@ body {
             <button class="tone-btn" data-tone="friendly" onclick="selectTone(this)">フレンドリー</button>
             <button class="tone-btn" data-tone="casual" onclick="selectTone(this)">カジュアル</button>
           </div>
+          <p style="font-size:10.5px;color:var(--text-mid);margin-top:8px;line-height:1.5;">丁寧：敬語重視 ／ フレンドリー：絵文字あり ／ カジュアル：砕けた文体</p>
         </div>
 
+        <!-- 返信者ポジション -->
+        <div class="settings-row-col">
+          <label>口コミ返信の署名</label>
+          <div class="responder-grid" id="responderBtns">
+            <button class="responder-btn" data-responder="owner" onclick="selectResponder(this)">👤<br>オーナー</button>
+            <button class="responder-btn" data-responder="staff" onclick="selectResponder(this)">🙋<br>スタッフ名</button>
+            <button class="responder-btn" data-responder="shop" onclick="selectResponder(this)">🏪<br>店舗名義</button>
+          </div>
+          <div class="responder-name-wrap" id="responderNameWrap">
+            <input class="settings-input" id="sResponderName" placeholder="例：田中（担当スタッフ名）" style="width:100%;box-sizing:border-box;margin-top:2px;">
+          </div>
+          <p style="font-size:10.5px;color:var(--text-mid);margin-top:8px;line-height:1.5;">返信文の末尾に自然に反映されます</p>
+        </div>
+
+        <!-- ターゲット客層 -->
+        <div class="settings-row-col">
+          <label>ターゲット客層 <span style="font-size:11px;font-weight:400;color:var(--text-mid)">（複数選択可）</span></label>
+          <div class="target-chips" id="targetChips">
+            <button class="target-chip" data-target="family" onclick="toggleTarget(this)">👨‍👩‍👧 ファミリー</button>
+            <button class="target-chip" data-target="couple" onclick="toggleTarget(this)">💑 カップル</button>
+            <button class="target-chip" data-target="business" onclick="toggleTarget(this)">💼 接待・ビジネス</button>
+            <button class="target-chip" data-target="solo" onclick="toggleTarget(this)">🚶 おひとり様</button>
+            <button class="target-chip" data-target="senior" onclick="toggleTarget(this)">🧓 シニア</button>
+            <button class="target-chip" data-target="young" onclick="toggleTarget(this)">🎓 学生・若者</button>
+          </div>
+          <p style="font-size:10.5px;color:var(--text-mid);margin-top:8px;line-height:1.5;">投稿文や返信の表現をこの層に合わせます</p>
+        </div>
+
+        <!-- 推しポイント -->
         <div class="settings-row" style="padding:14px 16px;">
           <label>推しポイント</label>
           <input class="settings-input" id="sAppealPoint" placeholder="例：創業30年の老舗、個室完備">
         </div>
 
+        <!-- NGワード -->
         <span class="settings-section-subtitle">NGワード</span>
         <div class="keyword-list" id="ngWordList"></div>
         <div class="add-kw-row">
-          <input id="newNgWord" placeholder="例：値引き、他社比較" onkeydown="if(event.key==='Enter')addNgWord()">
+          <input id="newNgWord" placeholder="例：値引き、激安" onkeydown="if(event.key==='Enter')addNgWord()">
           <button class="add-kw-btn" onclick="addNgWord()">追加</button>
         </div>
-        <span class="settings-hint">AIが絶対に使わない言葉を登録できます</span>
+        <span class="settings-hint">登録した言葉はAIが絶対に使いません。競合他社名・避けたい表現などを登録してください。</span>
 
+        <!-- よく使うフレーズ -->
         <span class="settings-section-subtitle">よく使うフレーズ</span>
         <div class="keyword-list" id="preferredPhraseList"></div>
         <div class="add-kw-row">
           <input id="newPreferredPhrase" placeholder="例：またのお越しをお待ちしております" onkeydown="if(event.key==='Enter')addPreferredPhrase()">
           <button class="add-kw-btn" onclick="addPreferredPhrase()">追加</button>
         </div>
-        <span class="settings-hint">口コミ返信や投稿案に積極的に使わせたいフレーズ</span>
+        <span class="settings-hint">口コミ返信の結び・投稿の締めくくりなどに積極的に使わせたいフレーズを登録してください。</span>
       </div>
 
       <div class="settings-section">
@@ -1227,29 +1301,43 @@ async function executeTool(name, input) {
 const GENRE_PRESETS = {
   restaurant: {
     label: '飲食店',
-    systemAddition: `業種: 飲食店
-重点訴求: 季節感・食材の産地・雰囲気・予約のしやすさ
-口コミ返信で必ず含める: 再来店への感謝、具体的なメニュー名や季節の料理への言及
-NGにすべき対応: 「値段が高い」への直接反論、過度な割引訴求`,
+    subPlaceholder: '例：焼肉店・居酒屋・ランチカフェ・ラーメン専門店',
+    subHint: '具体的な業態を入れると、メニュー名・季節感・雰囲気の表現がより自然になります',
+    systemAddition: '業種: 飲食店\n重点訴求: 季節感・食材・雰囲気・予約しやすさ\n口コミ返信: 再来店への感謝、具体的なメニューへの言及\nNG対応: 値段への直接反論・過度な割引訴求',
   },
   beauty: {
     label: '美容室・サロン',
-    systemAddition: `業種: 美容室・サロン
-重点訴求: スタッフの技術力・丁寧なカウンセリング・再来店しやすい雰囲気
-口コミ返信で必ず含める: 担当スタッフへの感謝の言及、次回予約への自然な誘導
-NGにすべき対応: 価格交渉への直接回答、曖昧な施術効果の約束`,
+    subPlaceholder: '例：ヘアサロン・ネイルサロン・まつ毛エクステ・エステサロン',
+    subHint: '施術ジャンルを入れると、技術名・カウンセリング・再来店誘導の表現が自然になります',
+    systemAddition: '業種: 美容室・サロン\n重点訴求: 技術力・丁寧なカウンセリング・再来店しやすい雰囲気\n口コミ返信: 担当スタッフへの感謝、次回予約への自然な誘導\nNG対応: 価格交渉への直接回答・曖昧な施術効果の約束',
   },
   reform: {
     label: '建築・リフォーム',
-    systemAddition: `業種: 建築・リフォーム業
-重点訴求: 施工実績・アフターサポートの充実・対応エリア・安心感
-口コミ返信で必ず含める: 施工へのこだわりや品質保証への言及
-NGにすべき対応: 曖昧な工期や価格の約束、競合他社への言及`,
+    subPlaceholder: '例：外壁塗装・水回りリフォーム・内装工事・屋根修繕',
+    subHint: '工事の種類を入れると、施工実績・安心感・アフターサポートの表現が適切になります',
+    systemAddition: '業種: 建築・リフォーム業\n重点訴求: 施工実績・アフターサポート・対応エリア・安心感\n口コミ返信: 施工へのこだわり・品質保証への言及\nNG対応: 曖昧な工期や価格の約束・競合他社への言及',
   },
   other: {
     label: 'その他',
-    systemAddition: `業種: 店舗・サービス業`,
+    subPlaceholder: '例：整骨院・学習塾・ペットショップ・フィットネスジム',
+    subHint: '業態を入力することでAIが業種に合わせた言葉遣いや表現を選びます（必須）',
+    systemAddition: '業種: 店舗・サービス業',
   },
+};
+
+const TARGET_LABELS = {
+  family: 'ファミリー層',
+  couple: 'カップル・デート',
+  business: '接待・ビジネス利用',
+  solo: 'おひとり様',
+  senior: 'シニア層',
+  young: '学生・若者',
+};
+
+const RESPONDER_LABELS = {
+  owner: 'オーナー',
+  staff: 'スタッフ',
+  shop: '店舗名義',
 };
 
 const TONE_PRESETS = {
@@ -1261,67 +1349,97 @@ const TONE_PRESETS = {
 function buildSystemPrompt(s) {
   const preset = GENRE_PRESETS[s.genre] || GENRE_PRESETS.other;
   const tone = TONE_PRESETS[s.tone] || TONE_PRESETS.friendly;
+
+  // 業態補足
+  const genreDetail = s.genreSub ? ('具体的な業態: ' + s.genreSub) : '';
+
+  // 返信者
+  const responderMap = {
+    owner: 'オーナー本人として自然な一人称で返信してください。',
+    staff: s.responderName ? ('担当スタッフ「' + s.responderName + '」として返信してください。') : 'スタッフとして返信してください。',
+    shop: '店舗（会社）名義として返信してください。個人名は出さず、「スタッフ一同」などの表現を使ってください。',
+  };
+  const responderNote = responderMap[s.responder] || responderMap.owner;
+
+  // ターゲット客層
+  const targetNote = (s.targetAudience && s.targetAudience.length)
+    ? ('主なターゲット客層: ' + s.targetAudience.map(function(t){ return TARGET_LABELS[t] || t; }).join('・') + '\nこの客層が共感しやすい言葉遣い・価値観を意識して文章を書いてください。')
+    : '';
+
+  // 推しポイント
+  const appealSection = s.appealPoint ? ('店舗の強み・推しポイント: ' + s.appealPoint) : '';
+
+  // NGワード
   const ngSection = (s.ngWords && s.ngWords.length)
     ? ('\n## 絶対に使わない表現\n' + s.ngWords.map(function(w){ return '- 「' + w + '」'; }).join('\n'))
     : '';
+
+  // よく使うフレーズ
   const phraseSection = (s.preferredPhrases && s.preferredPhrases.length)
     ? ('\n## 積極的に使うフレーズ\n' + s.preferredPhrases.map(function(p){ return '- 「' + p + '」'; }).join('\n'))
     : '';
-  const appealSection = s.appealPoint
-    ? ('\n店舗の強み・推しポイント: ' + s.appealPoint)
-    : '';
 
-  return `あなたは「MEOコンシェルジュ」です。
-店舗オーナーのLINEの相棒として、Google ビジネスプロフィール（GBP）の管理を全面的にサポートします。
-
-担当店舗: ${s.storeName || '（未設定）'}
-${preset.systemAddition}${appealSection}
-
-## 文体・口調
-${tone}${ngSection}${phraseSection}
-
-## できること
-- 口コミ返信の生成・投稿
-- GBP投稿の提案・公開
-- 集客データ（インサイト）の分析
-- 写真のGBPへのアップロード（カテゴリ: FOOD/INTERIOR/EXTERIOR/TEAM）
-- 店舗情報の変更（住所・業種・電話・営業時間・定休日・紹介文・URL）
-- キーワード検索順位の確認
-- 月次レポートの生成
-- AI画像生成（gpt-image-1）→ 生成後にUI上で「①写真としてアップ」「②投稿として公開」を選択可能
-
-## AI画像生成の対応
-ユーザーがAI画像生成を依頼したら:
-1. テーマや内容を確認（例：「どんな画像を作りますか？」）
-2. generate_ai_image ツールを呼ぶ（英語プロンプトで詳細に記述）
-3. 生成後はUI側が自動的に選択ボタンを表示するため、あなたは「生成しました！」と一言添えるだけでよい
-
-## 写真受信時の対応
-ユーザーが写真を送ってきたら:
-1. 写真の内容を一言コメント（料理・内観・外観・スタッフなどを判断）
-2. GBPのカテゴリを判断（FOOD/INTERIOR/EXTERIOR/TEAM）
-3. すぐに upload_photo_to_gbp ツールを呼ぶ（UIが承認確認を挟む）
-
-## 店舗情報変更の対応
-1. 変更したい項目と新しい値を確認
-2. get_store_info で現在値を取得して提示
-3. すぐに update_store_info で更新する（UIが承認確認を挟む）
-
-## 重要：承認フローについて
-reply_to_review / create_gbp_post / upload_photo_to_gbp / update_store_info の4つのツールは、
-UI側で自動的に承認確認ダイアログを表示する。
-あなたはチャットで「承認しますか？」と二重に聞わず、内容が揃ったら即座にツールを呼ぶこと。
-
-## 行動原則
-1. 短く・具体的に：LINEで読むことを意識して返答は簡潔に
-2. 行動を促す：提案後は「投稿しましょうか？」と次のアクションを明示
-3. 感情を汲む：苦情口コミは特に丁寧に扱う
-4. ツールを使う：情報が必要な場合は必ずツールを呼び出す
-
-## 返答スタイル
-- 口コミ返信文・投稿案は「」で囲んで提示する
-- 選択肢がある場合は番号リストで提示する`;
+  const lines = [
+    'あなたは「MEOコンシェルジュ」です。',
+    '店舗オーナーのLINEの相棒として、Google ビジネスプロフィール（GBP）の管理を全面的にサポートします。',
+    '',
+    '担当店舗: ' + (s.storeName || '（未設定）'),
+    preset.systemAddition,
+    genreDetail,
+    appealSection,
+    targetNote,
+    '',
+    '## 口コミ返信・文体について',
+    tone,
+    responderNote,
+    ngSection,
+    phraseSection,
+    '',
+    '## できること',
+    '- 口コミ返信の生成・投稿',
+    '- GBP投稿の提案・公開',
+    '- 集客データ（インサイト）の分析',
+    '- 写真のGBPへのアップロード（カテゴリ: FOOD/INTERIOR/EXTERIOR/TEAM）',
+    '- 店舗情報の変更（住所・業種・電話・営業時間・定休日・紹介文・URL）',
+    '- キーワード検索順位の確認',
+    '- 月次レポートの生成',
+    '- AI画像生成（gpt-image-1）→ 生成後にUI上で「①写真としてアップ」「②投稿として公開」を選択可能',
+    '',
+    '## AI画像生成の対応',
+    'ユーザーがAI画像生成を依頼したら:',
+    '1. テーマや内容を確認（例：「どんな画像を作りますか？」）',
+    '2. generate_ai_image ツールを呼ぶ（英語プロンプトで詳細に記述）',
+    '3. 生成後はUI側が自動的に選択ボタンを表示するため、あなたは「生成しました！」と一言添えるだけでよい',
+    '',
+    '## 写真受信時の対応',
+    'ユーザーが写真を送ってきたら:',
+    '1. 写真の内容を一言コメント（料理・内観・外観・スタッフなどを判断）',
+    '2. GBPのカテゴリを判断（FOOD/INTERIOR/EXTERIOR/TEAM）',
+    '3. すぐに upload_photo_to_gbp ツールを呼ぶ（UIが承認確認を挟む）',
+    '',
+    '## 店舗情報変更の対応',
+    '1. 変更したい項目と新しい値を確認',
+    '2. get_store_info で現在値を取得して提示',
+    '3. すぐに update_store_info で更新する（UIが承認確認を挟む）',
+    '',
+    '## 重要：承認フローについて',
+    'reply_to_review / create_gbp_post / upload_photo_to_gbp / update_store_info の4つのツールは、',
+    'UI側で自動的に承認確認ダイアログを表示する。',
+    'あなたはチャットで「承認しますか？」と二重に聞わず、内容が揃ったら即座にツールを呼ぶこと。',
+    '',
+    '## 行動原則',
+    '1. 短く・具体的に：LINEで読むことを意識して返答は簡潔に',
+    '2. 行動を促す：提案後は「投稿しましょうか？」と次のアクションを明示',
+    '3. 感情を汲む：苦情口コミは特に丁寧に扱う',
+    '4. ツールを使う：情報が必要な場合は必ずツールを呼び出す',
+    '',
+    '## 返答スタイル',
+    '- 口コミ返信文・投稿案は「」で囲んで提示する',
+    '- 選択肢がある場合は番号リストで提示する',
+  ];
+  return lines.filter(function(l){ return l !== null && l !== undefined; }).join('\n');
 }
+
 
 let conversationHistory = [];
 let pendingPhotoBase64 = null;
@@ -1527,7 +1645,10 @@ const DEFAULT_SETTINGS = {
   storeName: '焼肉 大将', storeId: '',
   keywords: ['焼肉 渋谷', '焼肉 個室 渋谷', '和牛 渋谷'],
   locations: [{ name: '渋谷駅前', address: '東京都渋谷区道玄坂1丁目' }],
-  genre: 'restaurant', tone: 'friendly',
+  genre: 'restaurant', genreSub: '焼肉店',
+  tone: 'friendly',
+  responder: 'owner', responderName: '',
+  targetAudience: [],
   appealPoint: '', ngWords: [], preferredPhrases: [],
 };
 let appSettings = Object.assign({}, DEFAULT_SETTINGS, JSON.parse(localStorage.getItem('meo_settings') || '{}'));
@@ -1536,17 +1657,32 @@ function openSettings() {
   document.getElementById('sStoreName').value = appSettings.storeName || '';
   document.getElementById('sStoreId').value = appSettings.storeId || '';
   document.getElementById('sAppealPoint').value = appSettings.appealPoint || '';
+  document.getElementById('sGenreSub').value = appSettings.genreSub || '';
+  document.getElementById('sResponderName').value = appSettings.responderName || '';
   renderKeywords();
   renderLocations();
   renderNgWords();
   renderPreferredPhrases();
   // 業種チップ
+  const genre = appSettings.genre || 'restaurant';
   document.querySelectorAll('.genre-chip').forEach(el => {
-    el.classList.toggle('selected', el.dataset.genre === (appSettings.genre || 'restaurant'));
+    el.classList.toggle('selected', el.dataset.genre === genre);
   });
+  updateGenreSubUI(genre);
   // 口調ボタン
   document.querySelectorAll('.tone-btn').forEach(el => {
     el.classList.toggle('selected', el.dataset.tone === (appSettings.tone || 'friendly'));
+  });
+  // 返信者
+  const responder = appSettings.responder || 'owner';
+  document.querySelectorAll('.responder-btn').forEach(el => {
+    el.classList.toggle('selected', el.dataset.responder === responder);
+  });
+  updateResponderNameUI(responder);
+  // ターゲット
+  const targets = appSettings.targetAudience || [];
+  document.querySelectorAll('.target-chip').forEach(el => {
+    el.classList.toggle('selected', targets.includes(el.dataset.target));
   });
   document.getElementById('settingsPanel').classList.add('open');
 }
@@ -1586,6 +1722,8 @@ function saveSettings() {
   appSettings.storeName = document.getElementById('sStoreName').value.trim();
   appSettings.storeId = document.getElementById('sStoreId').value.trim();
   appSettings.appealPoint = document.getElementById('sAppealPoint').value.trim();
+  appSettings.genreSub = document.getElementById('sGenreSub').value.trim();
+  appSettings.responderName = document.getElementById('sResponderName').value.trim();
   localStorage.setItem('meo_settings', JSON.stringify(appSettings));
   closeSettings();
   const genreLabel = (GENRE_PRESETS[appSettings.genre] || GENRE_PRESETS.other).label;
@@ -1597,11 +1735,45 @@ function selectGenre(el) {
   document.querySelectorAll('.genre-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   appSettings.genre = el.dataset.genre;
+  updateGenreSubUI(el.dataset.genre);
+}
+function updateGenreSubUI(genre) {
+  const wrap = document.getElementById('genreSubWrap');
+  const input = document.getElementById('sGenreSub');
+  const label = document.getElementById('genreSubLabel');
+  const required = document.getElementById('genreSubRequired');
+  const hint = document.getElementById('genreSubHint');
+  const preset = GENRE_PRESETS[genre] || GENRE_PRESETS.other;
+  wrap.classList.add('visible');
+  label.textContent = genre === 'other' ? '業態・業種名を入力してください' : '業態をさらに教えてください（任意）';
+  required.style.display = genre === 'other' ? '' : 'none';
+  input.placeholder = preset.subPlaceholder || '';
+  if (hint) hint.textContent = preset.subHint || '';
 }
 function selectTone(el) {
   document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   appSettings.tone = el.dataset.tone;
+}
+function selectResponder(el) {
+  document.querySelectorAll('.responder-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  appSettings.responder = el.dataset.responder;
+  updateResponderNameUI(el.dataset.responder);
+}
+function updateResponderNameUI(responder) {
+  const wrap = document.getElementById('responderNameWrap');
+  if (responder === 'staff') {
+    wrap.classList.add('visible');
+    document.getElementById('sResponderName').placeholder = '例：田中（担当スタッフ名）';
+  } else {
+    wrap.classList.remove('visible');
+  }
+}
+function toggleTarget(el) {
+  el.classList.toggle('selected');
+  const targets = [...document.querySelectorAll('.target-chip.selected')].map(c => c.dataset.target);
+  appSettings.targetAudience = targets;
 }
 
 function renderNgWords() {
