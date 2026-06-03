@@ -397,21 +397,27 @@ body {
 .qb-btn-tertiary:hover .qb-ter-label { color: var(--green); }
 
 /* ---- AI設定：業種チップ ---- */
-.genre-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.genre-chips {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-top: 8px; width: 100%;
+}
 .genre-chip {
-  padding: 6px 12px; border-radius: 100px; font-size: 12px; font-weight: 700;
+  padding: 9px 12px; border-radius: 12px; font-size: 13px; font-weight: 700;
   border: 1.5px solid var(--border); background: var(--white);
   cursor: pointer; font-family: inherit; color: var(--text-mid);
-  transition: all .15s;
+  transition: all .15s; text-align: center; white-space: nowrap;
 }
 .genre-chip.selected { border-color: var(--green); background: var(--green-light); color: var(--green); }
 
 /* ---- AI設定：口調ボタン ---- */
-.tone-btns { display: flex; gap: 0; margin-top: 4px; border: 1.5px solid var(--border); border-radius: 10px; overflow: hidden; }
+.tone-btns {
+  display: flex; gap: 0; margin-top: 8px;
+  border: 1.5px solid var(--border); border-radius: 12px; overflow: hidden; width: 100%;
+}
 .tone-btn {
-  flex: 1; padding: 7px 4px; font-size: 12px; font-weight: 700;
+  flex: 1; padding: 10px 4px; font-size: 13px; font-weight: 700;
   border: none; background: var(--white); cursor: pointer; font-family: inherit;
-  color: var(--text-mid); transition: all .15s;
+  color: var(--text-mid); transition: all .15s; white-space: nowrap;
   border-right: 1px solid var(--border);
 }
 .tone-btn:last-child { border-right: none; }
@@ -430,8 +436,23 @@ body {
   background: var(--green-light); color: var(--green); border: 1px solid rgba(26,122,74,.2);
 }
 .phrase-tag button { background: none; border: none; cursor: pointer; color: var(--green); font-size: 12px; line-height: 1; padding: 0; }
-.settings-section-subtitle { font-size: 11px; font-weight: 700; color: var(--text-mid); margin: 12px 0 6px; }
-.settings-hint { font-size: 10.5px; color: var(--text-mid); margin-top: 4px; line-height: 1.5; }
+.settings-row-col {
+  padding: 14px 16px; border-top: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 0;
+}
+.settings-row-col label {
+  font-size: 13px; color: var(--text); font-weight: 600;
+  margin-bottom: 8px; display: block;
+}
+.settings-section-subtitle {
+  font-size: 11px; font-weight: 700; color: var(--text-mid);
+  padding: 14px 16px 6px; border-top: 1px solid var(--border);
+  display: block;
+}
+.settings-hint {
+  font-size: 11px; color: var(--text-mid);
+  padding: 4px 16px 12px; line-height: 1.5;
+}
 
 /* ---- 入力エリア ---- */
 .input-area {
@@ -511,17 +532,17 @@ body {
 .settings-back-btn:hover { background: var(--green-light); }
 .settings-back-btn svg { width: 20px; height: 20px; }
 .settings-title { font-size: 15px; font-weight: 800; color: var(--text); }
-.settings-body { flex: 1; overflow-y: auto; padding: 16px 14px; }
+.settings-body { flex: 1; overflow-y: auto; padding: 20px 14px; }
 .settings-section {
-  background: white; border-radius: 16px; margin-bottom: 16px;
+  background: white; border-radius: 16px; margin-bottom: 20px;
   overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06);
 }
 .settings-section-title {
   font-size: 11px; font-weight: 700; color: var(--text-mid);
-  letter-spacing: .06em; padding: 14px 16px 8px; text-transform: uppercase;
+  letter-spacing: .06em; padding: 16px 16px 10px; text-transform: uppercase;
 }
 .settings-row {
-  padding: 10px 16px; border-top: 1px solid var(--border);
+  padding: 12px 16px; border-top: 1px solid var(--border);
   display: flex; align-items: center; gap: 10px;
 }
 .settings-row:first-of-type { border-top: none; }
@@ -850,7 +871,7 @@ body {
       <div class="settings-section">
         <div class="settings-section-title">🤖 AIの動作設定</div>
 
-        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <div class="settings-row-col">
           <label>業種</label>
           <div class="genre-chips" id="genreChips">
             <button class="genre-chip" data-genre="restaurant" onclick="selectGenre(this)">🍽 飲食店</button>
@@ -860,7 +881,7 @@ body {
           </div>
         </div>
 
-        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <div class="settings-row-col">
           <label>口調</label>
           <div class="tone-btns" id="toneBtns">
             <button class="tone-btn" data-tone="formal" onclick="selectTone(this)">丁寧</button>
@@ -869,26 +890,26 @@ body {
           </div>
         </div>
 
-        <div class="settings-row">
+        <div class="settings-row" style="padding:14px 16px;">
           <label>推しポイント</label>
           <input class="settings-input" id="sAppealPoint" placeholder="例：創業30年の老舗、個室完備">
         </div>
 
-        <div class="settings-section-subtitle">NGワード</div>
+        <span class="settings-section-subtitle">NGワード</span>
         <div class="keyword-list" id="ngWordList"></div>
         <div class="add-kw-row">
           <input id="newNgWord" placeholder="例：値引き、他社比較" onkeydown="if(event.key==='Enter')addNgWord()">
           <button class="add-kw-btn" onclick="addNgWord()">追加</button>
         </div>
-        <p class="settings-hint">AIが絶対に使わない言葉を登録できます</p>
+        <span class="settings-hint">AIが絶対に使わない言葉を登録できます</span>
 
-        <div class="settings-section-subtitle">よく使うフレーズ</div>
+        <span class="settings-section-subtitle">よく使うフレーズ</span>
         <div class="keyword-list" id="preferredPhraseList"></div>
         <div class="add-kw-row">
           <input id="newPreferredPhrase" placeholder="例：またのお越しをお待ちしております" onkeydown="if(event.key==='Enter')addPreferredPhrase()">
           <button class="add-kw-btn" onclick="addPreferredPhrase()">追加</button>
         </div>
-        <p class="settings-hint">口コミ返信や投稿案に積極的に使わせたいフレーズ</p>
+        <span class="settings-hint">口コミ返信や投稿案に積極的に使わせたいフレーズ</span>
       </div>
 
       <div class="settings-section">
