@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>MEOコンシェルジュ — デモ</title>
+<title>MEOエージェント — デモ</title>
 <style>
 :root {
   --green: #1a7a4a;
@@ -747,7 +747,7 @@ body {
       </div>
       <div class="header-info">
         <div class="header-name">
-          MEOコンシェルジュ
+          MEOエージェント
           <span class="online-dot"></span>
         </div>
         <div class="header-sub">焼肉 大将 ・ デモモード</div>
@@ -1380,7 +1380,7 @@ function buildSystemPrompt(s) {
     : '';
 
   const lines = [
-    'あなたは「MEOコンシェルジュ」です。',
+    'あなたは「MEOエージェント」です。',
     '店舗オーナーのLINEの相棒として、Google ビジネスプロフィール（GBP）の管理を全面的にサポートします。',
     '',
     '担当店舗: ' + (s.storeName || '（未設定）'),
@@ -1965,7 +1965,7 @@ function setDesign(d) {
 }
 
 function showWelcome() {
-  addMessage('bot', 'こんにちは！MEOコンシェルジュです😊\n店舗「焼肉 大将」のGBP管理をサポートします。\n\n口コミ返信・投稿作成・データ確認など、何でもお気軽にどうぞ！\n\n📸 写真を送るとGBPの写真フォルダに追加できます。\n✏️ 住所・営業時間などの店舗情報変更もここで完結します。\n\n💡 下のボタンからよく使う機能をすぐに試せます。');
+  addMessage('bot', 'こんにちは！MEOエージェントです😊\n店舗「焼肉 大将」のGBP管理をサポートします。\n\n口コミ返信・投稿作成・データ確認など、何でもお気軽にどうぞ！\n\n📸 写真を送るとGBPの写真フォルダに追加できます。\n✏️ 住所・営業時間などの店舗情報変更もここで完結します。\n\n💡 下のボタンからよく使う機能をすぐに試せます。');
 }
 
 window.addEventListener('DOMContentLoaded', function() {
@@ -1985,3 +1985,4 @@ window.addEventListener('DOMContentLoaded', function() {
 </script>
 </body>
 </html>
+
